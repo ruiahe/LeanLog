@@ -1,2 +1,206 @@
-<!--pages/leanLog/index.wxml-->
-<text>pages/leanLog/index.wxml</text>
+<!-- 减肥打卡表单页面 -->
+<view class="container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="header-bg"></view>
+    <view class="header-content">
+      <view class="header-title">今日打卡</view>
+      <view class="header-date">{{ currentDate }}</view>
+      <view class="header-tip">坚持就是胜利，记录每一天的改变</view>
+    </view>
+  </view>
+
+  <!-- 表单主体 -->
+  <view class="form-container">
+    <!-- 基础数据卡片 -->
+    <view class="form-card">
+      <view class="card-header">
+        <van-icon name="chart-trending-o" size="18" color="#2D9A6B" />
+        <text class="card-title">基础数据</text>
+      </view>
+      <van-cell-group inset>
+        <van-field
+          value="{{ weight }}"
+          type="digit"
+          label="当前体重"
+          placeholder="请输入体重"
+          border="{{ false }}"
+          bind:change="onWeightChange"
+        >
+          <view slot="right-icon" class="unit">kg</view>
+        </van-field>
+        <van-field
+          value="{{ bodyFat }}"
+          type="digit"
+          label="体脂率"
+          placeholder="请输入体脂率"
+          border="{{ false }}"
+          bind:change="onBodyFatChange"
+        >
+          <view slot="right-icon" class="unit">%</view>
+        </van-field>
+        <van-cell title="记录时间" is-link bind:click="showDatePicker" value="{{ recordTime }}" />
+      </van-cell-group>
+    </view>
+
+    <!-- 饮食记录卡片 -->
+    <view class="form-card">
+      <view class="card-header">
+        <van-icon name="balance-list-o" size="18" color="#F5A623" />
+        <text class="card-title">饮食记录</text>
+      </view>
+      <van-cell-group inset>
+        <van-field
+          value="{{ breakfast }}"
+          label="早餐"
+          type="textarea"
+          placeholder="记录你的早餐..."
+          autosize
+          border="{{ false }}"
+          bind:change="onBreakfastChange"
+        />
+        <van-field
+          value="{{ lunch }}"
+          label="午餐"
+          type="textarea"
+          placeholder="记录你的午餐..."
+          autosize
+          border="{{ false }}"
+          bind:change="onLunchChange"
+        />
+        <van-field
+          value="{{ dinner }}"
+          label="晚餐"
+          type="textarea"
+          placeholder="记录你的晚餐..."
+          autosize
+          border="{{ false }}"
+          bind:change="onDinnerChange"
+        />
+        <van-field
+          value="{{ snacks }}"
+          label="加餐"
+          type="textarea"
+          placeholder="零食、水果等..."
+          autosize
+          border="{{ false }}"
+          bind:change="onSnacksChange"
+        />
+        <van-cell title="饮水量" border="{{ false }}">
+          <view class="water-counter">
+            <van-button size="small" type="default" bind:click="decreaseWater" custom-class="water-btn">-</van-button>
+            <text class="water-amount">{{ water }}杯</text>
+            <van-button size="small" type="default" bind:click="increaseWater" custom-class="water-btn">+</van-button>
+          </view>
+        </van-cell>
+      </van-cell-group>
+    </view>
+
+    <!-- 运动记录卡片 -->
+    <view class="form-card">
+      <view class="card-header">
+        <van-icon name="fire-o" size="18" color="#FF6B6B" />
+        <text class="card-title">运动记录</text>
+      </view>
+      <van-cell-group inset>
+        <van-cell title="是否运动" border="{{ false }}">
+          <van-switch checked="{{ exercised }}" bind:change="onExerciseSwitch" active-color="#34C759" />
+        </van-cell>
+        <van-field
+          wx:if="{{ exercised }}"
+          value="{{ exerciseType }}"
+          label="运动类型"
+          placeholder="如跑步、游泳、健身等"
+          border="{{ false }}"
+          bind:change="onExerciseTypeChange"
+        />
+        <van-cell wx:if="{{ exercised }}" title="运动时长" border="{{ false }}">
+          <view class="duration-slider">
+            <van-slider
+              value="{{ exerciseDuration }}"
+              min="0"
+              max="180"
+              step="5"
+              active-color="#FF6B6B"
+              bind:change="onDurationChange"
+            />
+            <text class="duration-text">{{ exerciseDuration }}分钟</text>
+          </view>
+        </van-cell>
+        <van-field
+          wx:if="{{ exercised }}"
+          value="{{ caloriesBurned }}"
+          type="number"
+          label="消耗热量"
+          placeholder="预估消耗热量"
+          border="{{ false }}"
+          bind:change="onCaloriesChange"
+        >
+          <view slot="right-icon" class="unit">kcal</view>
+        </van-field>
+      </van-cell-group>
+    </view>
+
+    <!-- 状态评估卡片 -->
+    <view class="form-card">
+      <view class="card-header">
+        <van-icon name="smile-o" size="18" color="#8B5CF6" />
+        <text class="card-title">状态评估</text>
+      </view>
+      <van-cell-group inset>
+        <van-cell title="今日状态" border="{{ false }}">
+          <van-rate value="{{ mood }}" bind:change="onMoodChange" size="25" color="#F5A623" void-color="#E8E8E8" />
+        </van-cell>
+        <van-cell title="饥饿感" border="{{ false }}">
+          <view class="hunger-tags">
+            <van-tag
+              wx:for="{{ hungerOptions }}"
+              wx:key="index"
+              size="medium"
+              type="{{ hunger === item.value ? 'primary' : 'default' }}"
+              custom-class="hunger-tag"
+              bind:click="selectHunger"
+              data-value="{{ item.value }}"
+            >
+              {{ item.label }}
+            </van-tag>
+          </view>
+        </van-cell>
+        <van-field
+          value="{{ notes }}"
+          label="备注"
+          type="textarea"
+          placeholder="记录今天的感受、心情..."
+          autosize
+          border="{{ false }}"
+          bind:change="onNotesChange"
+        />
+      </van-cell-group>
+    </view>
+
+    <!-- 提交按钮 -->
+    <view class="submit-area">
+      <van-button type="primary" block round bind:click="submitForm" color="#2D9A6B">
+        保存打卡记录
+      </van-button>
+    </view>
+  </view>
+
+  <!-- 日期选择器弹窗 -->
+  <van-popup show="{{ showDatePickerPopup }}" position="bottom" round>
+    <van-datetime-picker
+      type="datetime"
+      value="{{ currentDateTimestamp }}"
+      min-date="{{ minDate }}"
+      max-date="{{ maxDate }}"
+      bind:confirm="onDateConfirm"
+      bind:cancel="onDateCancel"
+    />
+  </van-popup>
+
+  <!-- Toast 提示 -->
+  <van-toast id="van-toast" />
+
+  <!-- Notify 弱提示 -->
+  <van-notify id="van-notify" />
+</view>

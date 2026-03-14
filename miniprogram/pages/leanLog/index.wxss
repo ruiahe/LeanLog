@@ -1,1 +1,205 @@
-/* pages/leanLog/index.wxss */
+/* 减肥打卡表单页面样式 */
+
+/* 页面容器 */
+.container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #F7F9FC 0%, #EDF2F7 100%);
+  padding-bottom: 40rpx;
+}
+
+/* 头部区域 */
+.header {
+  position: relative;
+  padding: 60rpx 40rpx 80rpx;
+  margin-bottom: -40rpx;
+}
+
+.header-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 280rpx;
+  background: linear-gradient(135deg, #2D9A6B 0%, #34C759 100%);
+  border-radius: 0 0 60rpx 60rpx;
+}
+
+.header-content {
+  position: relative;
+  z-index: 1;
+  color: #FFFFFF;
+}
+
+.header-title {
+  font-size: 48rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  margin-bottom: 12rpx;
+}
+
+.header-date {
+  font-size: 28rpx;
+  opacity: 0.9;
+  margin-bottom: 16rpx;
+}
+
+.header-tip {
+  font-size: 24rpx;
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8rpx 20rpx;
+  border-radius: 30rpx;
+  display: inline-block;
+}
+
+/* 表单容器 */
+.form-container {
+  padding: 0 30rpx;
+  position: relative;
+  z-index: 2;
+}
+
+/* 表单卡片 */
+.form-card {
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 30rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.04);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx solid #F5F7FA;
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin-left: 12rpx;
+}
+
+/* 单位文字 */
+.unit {
+  color: #999999;
+  font-size: 28rpx;
+  padding-left: 8rpx;
+}
+
+/* 饮水量计数器 */
+.water-counter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.water-amount {
+  font-size: 28rpx;
+  color: #2D9A6B;
+  font-weight: 600;
+  margin: 0 20rpx;
+  min-width: 80rpx;
+  text-align: center;
+}
+
+.water-btn {
+  width: 56rpx !important;
+  height: 56rpx !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  background: #F5F7FA !important;
+  border: none !important;
+  color: #2D9A6B !important;
+  font-size: 32rpx !important;
+  font-weight: 600 !important;
+}
+
+/* 运动时长滑块 */
+.duration-slider {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.duration-slider van-slider {
+  width: 320rpx;
+}
+
+.duration-text {
+  font-size: 24rpx;
+  color: #FF6B6B;
+  font-weight: 500;
+  margin-top: 12rpx;
+}
+
+/* 饥饿感标签 */
+.hunger-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  justify-content: flex-end;
+}
+
+.hunger-tag {
+  margin: 0 !important;
+  border-radius: 20rpx !important;
+  padding: 8rpx 20rpx !important;
+}
+
+/* 提交按钮区域 */
+.submit-area {
+  padding: 40rpx 20rpx;
+  margin-top: 20rpx;
+}
+
+/* Vant 组件样式覆盖 */
+.form-card .van-cell-group--inset {
+  margin: 0 !important;
+  border-radius: 16rpx !important;
+}
+
+.form-card .van-cell {
+  padding: 24rpx 20rpx !important;
+  font-size: 28rpx !important;
+}
+
+.form-card .van-cell__title {
+  color: #666666 !important;
+  font-weight: 500;
+  min-width: 140rpx !important;
+}
+
+.form-card .van-field__control {
+  font-size: 28rpx !important;
+  color: #333333 !important;
+}
+
+.form-card .van-field__control::placeholder {
+  color: #CCCCCC !important;
+}
+
+/* 按钮样式 */
+.submit-area .van-button--primary {
+  height: 96rpx !important;
+  font-size: 32rpx !important;
+  font-weight: 600 !important;
+  letter-spacing: 4rpx !important;
+  box-shadow: 0 8rpx 24rpx rgba(45, 154, 107, 0.3) !important;
+}
+
+/* 评分组件样式 */
+.form-card .van-rate {
+  display: flex;
+  gap: 8rpx;
+}
+
+/* 标签选中样式 */
+.form-card .van-tag--primary {
+  background-color: #2D9A6B !important;
+  border-color: #2D9A6B !important;
+}
