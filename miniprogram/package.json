@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@babel/runtime": "^7.28.6",
     "@vant/weapp": "^1.11.7"
   }
 }

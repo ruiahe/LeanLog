@@ -5,7 +5,6 @@
     <view class="header-bg"></view>
     <view class="header-content">
       <view class="header-title">今日打卡</view>
-      <view class="header-date">{{ currentDate }}</view>
       <view class="header-tip">坚持就是胜利，记录每一天的改变</view>
     </view>
   </view>
@@ -15,17 +14,18 @@
     <!-- 基础数据卡片 -->
     <view class="form-card">
       <view class="card-header">
-        <van-icon name="chart-trending-o" size="18" color="#2D9A6B" />
+        <van-icon name="chart-trending-o" size="18" color="{{ primaryColor }}" />
         <text class="card-title">基础数据</text>
       </view>
       <van-cell-group inset>
         <van-field
           value="{{ weight }}"
           type="digit"
-          label="当前体重"
+          label="空腹体重"
           placeholder="请输入体重"
           border="{{ false }}"
-          bind:change="onWeightChange"
+          data-field="weight"
+          bind:change="onDataChange"
         >
           <view slot="right-icon" class="unit">kg</view>
         </van-field>
@@ -35,11 +35,11 @@
           label="体脂率"
           placeholder="请输入体脂率"
           border="{{ false }}"
-          bind:change="onBodyFatChange"
+          data-field="bodyFat"
+          bind:change="onDataChange"
         >
           <view slot="right-icon" class="unit">%</view>
         </van-field>
-        <van-cell title="记录时间" is-link bind:click="showDatePicker" value="{{ recordTime }}" />
       </van-cell-group>
     </view>
 
@@ -50,49 +50,30 @@
         <text class="card-title">饮食记录</text>
       </view>
       <van-cell-group inset>
-        <van-field
-          value="{{ breakfast }}"
-          label="早餐"
-          type="textarea"
-          placeholder="记录你的早餐..."
-          autosize
-          border="{{ false }}"
-          bind:change="onBreakfastChange"
-        />
-        <van-field
-          value="{{ lunch }}"
-          label="午餐"
-          type="textarea"
-          placeholder="记录你的午餐..."
-          autosize
-          border="{{ false }}"
-          bind:change="onLunchChange"
-        />
-        <van-field
-          value="{{ dinner }}"
-          label="晚餐"
-          type="textarea"
-          placeholder="记录你的晚餐..."
-          autosize
-          border="{{ false }}"
-          bind:change="onDinnerChange"
-        />
-        <van-field
-          value="{{ snacks }}"
-          label="加餐"
-          type="textarea"
-          placeholder="零食、水果等..."
-          autosize
-          border="{{ false }}"
-          bind:change="onSnacksChange"
-        />
-        <van-cell title="饮水量" border="{{ false }}">
-          <view class="water-counter">
-            <van-button size="small" type="default" bind:click="decreaseWater" custom-class="water-btn">-</van-button>
-            <text class="water-amount">{{ water }}杯</text>
-            <van-button size="small" type="default" bind:click="increaseWater" custom-class="water-btn">+</van-button>
-          </view>
+        <van-cell title="是否按计划饮食" border="{{ false }}">
+          <van-switch data-field="isHealthyDiet" checked="{{ isHealthyDiet }}" bind:change="onDataChange" active-color="{{ primaryColor }}" size="24px"/>
         </van-cell>
+        <van-field
+          value="{{ water }}"
+          type="digit"
+          label="饮水量"
+          placeholder="请输入饮水量"
+          border="{{ false }}"
+          data-field="water"
+          bind:change="onDataChange"
+        >
+          <view slot="right-icon" class="unit">ml</view>
+        </van-field>
+        <van-field
+          value="{{ diet }}"
+          label="饮食记录"
+          type="textarea"
+          placeholder="你的饮食..."
+          autosize
+          border="{{ false }}"
+          data-field="diet"
+          bind:change="onDataChange"
+        />
       </van-cell-group>
     </view>
 
@@ -103,55 +84,91 @@
         <text class="card-title">运动记录</text>
       </view>
       <van-cell-group inset>
-        <van-cell title="是否运动" border="{{ false }}">
-          <van-switch checked="{{ exercised }}" bind:change="onExerciseSwitch" active-color="#34C759" />
-        </van-cell>
         <van-field
-          wx:if="{{ exercised }}"
-          value="{{ exerciseType }}"
-          label="运动类型"
-          placeholder="如跑步、游泳、健身等"
+          value="{{ stepNumber }}"
+          type="digit"
+          label="行走步数"
+          placeholder="请输入步数"
           border="{{ false }}"
-          bind:change="onExerciseTypeChange"
-        />
-        <van-cell wx:if="{{ exercised }}" title="运动时长" border="{{ false }}">
-          <view class="duration-slider">
-            <van-slider
-              value="{{ exerciseDuration }}"
-              min="0"
-              max="180"
-              step="5"
-              active-color="#FF6B6B"
-              bind:change="onDurationChange"
-            />
-            <text class="duration-text">{{ exerciseDuration }}分钟</text>
-          </view>
-        </van-cell>
-        <van-field
-          wx:if="{{ exercised }}"
-          value="{{ caloriesBurned }}"
-          type="number"
-          label="消耗热量"
-          placeholder="预估消耗热量"
-          border="{{ false }}"
-          bind:change="onCaloriesChange"
+          data-field="stepNumber"
+          bind:change="onDataChange"
         >
-          <view slot="right-icon" class="unit">kcal</view>
+          <view slot="right-icon" class="unit">步</view>
         </van-field>
+        <van-cell title="是否运动" border="{{ false }}">
+          <van-switch  data-field="exercised" checked="{{ exercised }}" bind:change="onDataChange" active-color="{{ primaryColor }}" size="24"/>
+        </van-cell>
+
+        <!-- 有氧运动列表 -->
+        <block wx:if="{{ exercised }}">
+          <view wx:for="{{ exerciseList }}" wx:key="id" class="exercise-item">
+            <view class="exercise-header">
+              <text class="exercise-label">运动 {{ index + 1 }}</text>
+              <view wx:if="{{ exerciseList.length > 1 }}" class="exercise-remove" bindtap="removeExercise" data-index="{{ index }}">
+                <van-icon name="delete-o" size="16" color="#ff6b6b" />
+              </view>
+            </view>
+            <view class="exercise-content">
+              <view class="exercise-type-selector" bindtap="showExerciseTypePicker" data-index="{{ index }}">
+                <text class="type-label">运动类型</text>
+                <view class="type-value">
+                  <text class="{{ item.typeLabel ? 'selected' : 'placeholder' }}">
+                    <text wx:if="{{ item.categoryName }}" class="type-category">{{ item.categoryName }} · </text>{{ item.typeLabel || '请选择' }}
+                  </text>
+                  <van-icon name="arrow" size="14" color="#999" />
+                </view>
+              </view>
+              <view class="exercise-duration-input">
+                <text class="duration-label">运动时长</text>
+                <view class="duration-value">
+                  <input
+                    class="duration-number"
+                    type="number"
+                    value="{{ item.duration }}"
+                    placeholder="0"
+                    bindinput="onExerciseDurationInput"
+                    data-index="{{ index }}"
+                  />
+                  <text class="duration-unit">分钟</text>
+                </view>
+              </view>
+            </view>
+          </view>
+
+          <!-- 添加运动按钮 -->
+          <view class="add-exercise-btn" bindtap="addExercise">
+            <van-icon name="plus" size="16" color="{{ primaryColor }}" />
+            <text>添加运动</text>
+          </view>
+        </block>
       </van-cell-group>
     </view>
 
-    <!-- 状态评估卡片 -->
+    <!-- 睡眠与状态卡片 -->
     <view class="form-card">
       <view class="card-header">
-        <van-icon name="smile-o" size="18" color="#8B5CF6" />
-        <text class="card-title">状态评估</text>
+        <van-icon name="moon-o" size="18" color="#8B5CF6" />
+        <text class="card-title">睡眠与状态</text>
       </view>
       <van-cell-group inset>
+        <!-- 昨夜睡眠 -->
+        <van-field
+          value="{{ sleepDuration }}"
+          type="digit"
+          label="昨夜睡眠"
+          placeholder="请输入昨夜睡眠时长"
+          border="{{ false }}"
+          data-field="sleepDuration"
+          bind:change="onDataChange"
+        >
+          <view slot="right-icon" class="unit">小时</view>
+        </van-field>
+        <!-- 今日状态 -->
         <van-cell title="今日状态" border="{{ false }}">
-          <van-rate value="{{ mood }}" bind:change="onMoodChange" size="25" color="#F5A623" void-color="#E8E8E8" />
+          <van-rate value="{{ mood }}" bind:change="onMoodChange" size="24" color="#F5A623" void-color="#E8E8E8" gutter="2"/>
         </van-cell>
-        <van-cell title="饥饿感" border="{{ false }}">
+        <!-- 饥饿感 -->
+        <van-cell title="饥饿感" border="{{ false }}" is-link="{{ false }}" clickable="{{ false }}">
           <view class="hunger-tags">
             <van-tag
               wx:for="{{ hungerOptions }}"
@@ -159,32 +176,200 @@
               size="medium"
               type="{{ hunger === item.value ? 'primary' : 'default' }}"
               custom-class="hunger-tag"
-              bind:click="selectHunger"
+              catchtap="selectHunger"
               data-value="{{ item.value }}"
             >
               {{ item.label }}
             </van-tag>
           </view>
         </van-cell>
+      </van-cell-group>
+    </view>
+
+    <!-- 睡前数据卡片 -->
+    <view class="form-card">
+      <view class="card-header">
+        <van-icon name="balance-list-o" size="18" color="#5B8FF9" />
+        <text class="card-title">睡前数据</text>
+      </view>
+      <van-cell-group inset>
+        <van-field
+          value="{{ bedTimeWeight }}"
+          type="digit"
+          label="睡前体重"
+          placeholder="请输入睡前体重"
+          border="{{ false }}"
+          data-field="bedTimeWeight"
+          bind:change="onDataChange"
+        >
+          <view slot="right-icon" class="unit">kg</view>
+        </van-field>
         <van-field
           value="{{ notes }}"
-          label="备注"
+          label="今日备注"
           type="textarea"
           placeholder="记录今天的感受、心情..."
           autosize
           border="{{ false }}"
-          bind:change="onNotesChange"
+          data-field="notes"
+          bind:change="onDataChange"
         />
       </van-cell-group>
     </view>
 
+    <!-- 三维记录卡片（每周记录） -->
+    <view class="form-card {{ showMeasurements ? '' : 'collapsed' }}">
+      <view class="card-header card-header-clickable" bindtap="toggleMeasurementsCard">
+        <van-icon name="scan" size="18" color="#13C2C2" />
+        <text class="card-title">三维记录</text>
+        <text class="card-subtitle">每周记录一次</text>
+        <van-icon name="{{ showMeasurements ? 'arrow-up' : 'arrow-down' }}" size="16" color="#999" class="card-arrow" />
+      </view>
+      <view class="card-content {{ showMeasurements ? 'expanded' : '' }}">
+        <van-cell-group inset>
+        <van-field
+          value="{{ chest }}"
+          type="digit"
+          label="胸围"
+          placeholder="请输入胸围"
+          border="{{ false }}"
+          data-field="chest"
+          bind:change="onDataChange"
+        >
+          <view slot="right-icon" class="unit">cm</view>
+        </van-field>
+        <van-field
+          value="{{ waist }}"
+          type="digit"
+          label="腰围"
+          placeholder="请输入腰围"
+          border="{{ false }}"
+          data-field="waist"
+          bind:change="onDataChange"
+        >
+          <view slot="right-icon" class="unit">cm</view>
+        </van-field>
+        <van-field
+          value="{{ hip }}"
+          type="digit"
+          label="臀围"
+          placeholder="请输入臀围"
+          border="{{ false }}"
+          data-field="hip"
+          bind:change="onDataChange"
+        >
+          <view slot="right-icon" class="unit">cm</view>
+        </van-field>
+        <van-field
+          value="{{ arm }}"
+          type="digit"
+          label="上臂围"
+          placeholder="请输入上臂围"
+          border="{{ false }}"
+          data-field="arm"
+          bind:change="onDataChange"
+        >
+          <view slot="right-icon" class="unit">cm</view>
+        </van-field>
+        <van-field
+          value="{{ thigh }}"
+          type="digit"
+          label="大腿围"
+          placeholder="请输入大腿围"
+          border="{{ false }}"
+          data-field="thigh"
+          bind:change="onDataChange"
+        >
+          <view slot="right-icon" class="unit">cm</view>
+        </van-field>
+        </van-cell-group>
+      </view>
+    </view>
+
     <!-- 提交按钮 -->
     <view class="submit-area">
-      <van-button type="primary" block round bind:click="submitForm" color="#2D9A6B">
+      <van-button type="primary" block round bind:click="submitForm" color="{{ primaryColor }}">
         保存打卡记录
       </van-button>
     </view>
   </view>
+
+  <!-- 运动分类选择弹窗（第一步） -->
+  <van-popup show="{{ showExerciseCategoryPopup }}" position="bottom" round custom-style="overflow: visible;">
+    <view class="exercise-picker">
+      <view class="picker-header">
+        <text class="picker-title">选择运动分类</text>
+        <view class="picker-close" bindtap="hideExerciseCategoryPopup">
+          <van-icon name="cross" size="20" />
+        </view>
+      </view>
+      <view class="picker-options">
+        <view
+          wx:for="{{ exerciseCategories }}"
+          wx:key="value"
+          class="picker-option {{ currentExerciseIndex !== null && exerciseList[currentExerciseIndex].category === item.value ? 'active' : '' }}"
+          bindtap="selectExerciseCategory"
+          data-value="{{ item.value }}"
+          data-label="{{ item.label }}"
+        >
+          <text>{{ item.label }}</text>
+          <van-icon name="arrow" size="16" color="#999" />
+        </view>
+      </view>
+    </view>
+  </van-popup>
+
+  <!-- 运动类型选择弹窗（第二步） -->
+  <van-popup show="{{ showExerciseTypePopup }}" position="bottom" round custom-style="overflow: visible;">
+    <view class="exercise-picker">
+      <view class="picker-header">
+        <view class="picker-back" bindtap="backToCategory">
+          <van-icon name="arrow-left" size="18" />
+          <text>返回</text>
+        </view>
+        <text class="picker-title">{{ exerciseList[currentExerciseIndex].categoryName || '选择运动' }}</text>
+        <view class="picker-close" bindtap="hideExerciseTypePicker">
+          <van-icon name="cross" size="20" />
+        </view>
+      </view>
+      <view class="picker-options">
+        <view
+          wx:for="{{ exerciseTypesByCategory[exerciseList[currentExerciseIndex].category] }}"
+          wx:key="value"
+          class="picker-option {{ currentExerciseIndex !== null && exerciseList[currentExerciseIndex].type === item.value ? 'active' : '' }}"
+          bindtap="selectExerciseType"
+          data-value="{{ item.value }}"
+          data-label="{{ item.label }}"
+        >
+          <text>{{ item.label }}</text>
+          <van-icon wx:if="{{ currentExerciseIndex !== null && exerciseList[currentExerciseIndex].type === item.value }}" name="success" color="{{ primaryColor }}" />
+        </view>
+      </view>
+      
+      <!-- 自定义运动类型输入区域 -->
+      <view wx:if="{{ showCustomInput }}" class="custom-input-area">
+        <view class="custom-input-wrapper">
+          <input 
+            class="custom-input"
+            type="text"
+            value="{{ customExerciseType }}"
+            placeholder="请输入运动类型"
+            bindinput="onCustomExerciseInput"
+            maxlength="20"
+          />
+          <van-button 
+            type="primary" 
+            size="small" 
+            color="{{ primaryColor }}"
+            bind:click="confirmCustomExercise"
+            custom-class="custom-confirm-btn"
+          >
+            确认
+          </van-button>
+        </view>
+      </view>
+    </view>
+  </van-popup>
 
   <!-- 日期选择器弹窗 -->
   <van-popup show="{{ showDatePickerPopup }}" position="bottom" round>

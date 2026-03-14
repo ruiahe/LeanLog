@@ -1,17 +1,16 @@
 /* 减肥打卡表单页面样式 */
-
-/* 页面容器 */
+/* ==================== 页面容器 ==================== */
 .container {
   min-height: 100vh;
-  background: linear-gradient(180deg, #F7F9FC 0%, #EDF2F7 100%);
+  background: linear-gradient(180deg, var(--bg-color) 0%, var(--bg-secondary) 100%);
   padding-bottom: 40rpx;
 }
 
-/* 头部区域 */
+/* ==================== 头部区域 ==================== */
 .header {
   position: relative;
-  padding: 60rpx 40rpx 80rpx;
-  margin-bottom: -40rpx;
+  padding: 30rpx 60rpx 80rpx;
+  margin-bottom: 10rpx;
 }
 
 .header-bg {
@@ -19,8 +18,8 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 280rpx;
-  background: linear-gradient(135deg, #2D9A6B 0%, #34C759 100%);
+  height: 230rpx;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
   border-radius: 0 0 60rpx 60rpx;
 }
 
@@ -35,6 +34,7 @@
   font-weight: 700;
   letter-spacing: 2rpx;
   margin-bottom: 12rpx;
+  text-align: center;
 }
 
 .header-date {
@@ -52,20 +52,37 @@
   display: inline-block;
 }
 
-/* 表单容器 */
+/* ==================== 表单容器 ==================== */
 .form-container {
   padding: 0 30rpx;
   position: relative;
   z-index: 2;
 }
 
-/* 表单卡片 */
+/* ==================== 表单卡片 ==================== */
 .form-card {
-  background: #FFFFFF;
+  background: var(--card-bg);
   border-radius: 24rpx;
   padding: 30rpx;
   margin-bottom: 24rpx;
   box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.04);
+}
+
+.form-card.collapsed {
+  padding-bottom: 20rpx;
+}
+
+.card-content {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+}
+
+.card-content.expanded {
+  max-height: 2000rpx;
+  opacity: 1;
+  margin-top: 24rpx;
 }
 
 .card-header {
@@ -73,24 +90,47 @@
   align-items: center;
   margin-bottom: 24rpx;
   padding-bottom: 20rpx;
-  border-bottom: 2rpx solid #F5F7FA;
+  border-bottom: 2rpx solid var(--border-color);
+}
+
+.card-header-clickable {
+  justify-content: space-between;
+  margin-bottom: 0;
+  padding-bottom: 20rpx;
+  transition: background-color 0.2s ease;
+}
+
+.card-header-clickable:active {
+  background-color: var(--bg-secondary);
+  border-radius: 20rpx;
 }
 
 .card-title {
   font-size: 32rpx;
   font-weight: 600;
-  color: #1A1A1A;
+  color: var(--text-primary);
   margin-left: 12rpx;
 }
 
-/* 单位文字 */
+.card-subtitle {
+  font-size: 22rpx;
+  color: var(--text-hint);
+  margin-left: 16rpx;
+  font-weight: 400;
+}
+
+.card-arrow {
+  margin-left: auto;
+}
+
+/* ==================== 单位文字 ==================== */
 .unit {
-  color: #999999;
+  color: var(--text-hint);
   font-size: 28rpx;
   padding-left: 8rpx;
 }
 
-/* 饮水量计数器 */
+/* ==================== 饮水量计数器 ==================== */
 .water-counter {
   display: flex;
   align-items: center;
@@ -99,7 +139,7 @@
 
 .water-amount {
   font-size: 28rpx;
-  color: #2D9A6B;
+  color: var(--primary-color);
   font-weight: 600;
   margin: 0 20rpx;
   min-width: 80rpx;
@@ -111,14 +151,14 @@
   height: 56rpx !important;
   padding: 0 !important;
   border-radius: 50% !important;
-  background: #F5F7FA !important;
+  background: var(--border-color) !important;
   border: none !important;
-  color: #2D9A6B !important;
+  color: var(--primary-color) !important;
   font-size: 32rpx !important;
   font-weight: 600 !important;
 }
 
-/* 运动时长滑块 */
+/* ==================== 运动时长滑块 ==================== */
 .duration-slider {
   display: flex;
   flex-direction: column;
@@ -132,12 +172,12 @@
 
 .duration-text {
   font-size: 24rpx;
-  color: #FF6B6B;
+  color: var(--danger-color);
   font-weight: 500;
   margin-top: 12rpx;
 }
 
-/* 饥饿感标签 */
+/* ==================== 饥饿感标签 ==================== */
 .hunger-tags {
   display: flex;
   flex-wrap: wrap;
@@ -151,13 +191,13 @@
   padding: 8rpx 20rpx !important;
 }
 
-/* 提交按钮区域 */
+/* ==================== 提交按钮区域 ==================== */
 .submit-area {
   padding: 40rpx 20rpx;
   margin-top: 20rpx;
 }
 
-/* Vant 组件样式覆盖 */
+/* ==================== Vant 组件样式覆盖 ==================== */
 .form-card .van-cell-group--inset {
   margin: 0 !important;
   border-radius: 16rpx !important;
@@ -169,18 +209,18 @@
 }
 
 .form-card .van-cell__title {
-  color: #666666 !important;
+  color: var(--text-secondary) !important;
   font-weight: 500;
   min-width: 140rpx !important;
 }
 
 .form-card .van-field__control {
   font-size: 28rpx !important;
-  color: #333333 !important;
+  color: var(--text-primary) !important;
 }
 
 .form-card .van-field__control::placeholder {
-  color: #CCCCCC !important;
+  color: var(--text-placeholder) !important;
 }
 
 /* 按钮样式 */
@@ -189,7 +229,7 @@
   font-size: 32rpx !important;
   font-weight: 600 !important;
   letter-spacing: 4rpx !important;
-  box-shadow: 0 8rpx 24rpx rgba(45, 154, 107, 0.3) !important;
+  box-shadow: 0 8rpx 24rpx rgba(122, 147, 172, 0.3) !important;
 }
 
 /* 评分组件样式 */
@@ -200,6 +240,228 @@
 
 /* 标签选中样式 */
 .form-card .van-tag--primary {
-  background-color: #2D9A6B !important;
-  border-color: #2D9A6B !important;
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+/* ==================== 运动类型选择弹窗 ==================== */
+.exercise-picker {
+  background: var(--card-bg);
+  border-radius: 32rpx 32rpx 0 0;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx 40rpx;
+  border-bottom: 2rpx solid var(--border-color);
+}
+
+.picker-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.picker-close {
+  padding: 10rpx;
+}
+
+.picker-options {
+  padding: 20rpx 40rpx 0;
+}
+
+.picker-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx 20rpx;
+  border-bottom: 2rpx solid var(--border-color);
+  font-size: 30rpx;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.picker-option:last-child {
+  border-bottom: none;
+}
+
+.picker-option.active {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+/* ==================== 运动项样式 ==================== */
+.exercise-item {
+  background: var(--bg-secondary);
+  border-radius: 16rpx;
+  margin-bottom: 24rpx;
+  overflow: hidden;
+}
+
+.exercise-item:last-child {
+  margin-bottom: 0;
+}
+
+.exercise-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  border-bottom: 2rpx solid var(--border-color);
+}
+
+.exercise-label {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.exercise-remove {
+  padding: 8rpx;
+}
+
+.exercise-content {
+  padding: 8rpx 0;
+}
+
+.exercise-type-selector,
+.exercise-duration-input {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx;
+}
+
+.type-label,
+.duration-label {
+  font-size: 28rpx;
+  color: var(--text-secondary);
+}
+
+.type-value,
+.duration-value {
+  display: flex;
+  align-items: center;
+}
+
+.type-value text {
+  font-size: 28rpx;
+  margin-right: 8rpx;
+}
+
+.type-value text.selected {
+  color: var(--text-primary);
+}
+
+.type-value text.placeholder {
+  color: var(--text-placeholder);
+}
+
+.duration-number {
+  width: 80rpx;
+  font-size: 28rpx;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+.duration-unit {
+  font-size: 26rpx;
+  color: var(--text-hint);
+  margin-left: 8rpx;
+}
+
+.add-exercise-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx 0;
+  border: 2rpx dashed var(--primary-color);
+  border-radius: 16rpx;
+  color: var(--primary-color);
+  font-size: 28rpx;
+  margin-top: 20rpx;
+}
+
+.add-exercise-btn text {
+  margin-left: 8rpx;
+}
+
+/* ==================== 自定义运动类型输入区域 ==================== */
+.custom-input-area {
+  padding: 30rpx 40rpx;
+  border-top: 2rpx solid var(--border-color);
+  background: var(--bg-secondary);
+}
+
+.custom-input-label {
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  margin-bottom: 20rpx;
+}
+
+.custom-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.custom-input {
+  flex: 1;
+  height: 72rpx;
+  background: var(--card-bg);
+  border: 2rpx solid var(--border-color);
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  color: var(--text-primary);
+}
+
+.custom-input:focus {
+  border-color: var(--primary-color);
+}
+
+.custom-confirm-btn {
+  flex-shrink: 0 !important;
+  height: 72rpx !important;
+  line-height: 72rpx !important;
+  padding: 0 32rpx !important;
+  border-radius: 12rpx !important;
+}
+
+/* ==================== 睡眠时长调节器 ==================== */
+.sleep-duration-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.sleep-adjust-btn {
+  width: 52rpx;
+  height: 52rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border-radius: 50%;
+  border: 2rpx solid var(--border-color);
+}
+
+.sleep-adjust-btn:active {
+  background: var(--border-color);
+}
+
+.sleep-duration-value {
+  min-width: 60rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--primary-color);
+  text-align: center;
+}
+
+.sleep-duration-unit {
+  font-size: 24rpx;
+  color: var(--text-hint);
 }

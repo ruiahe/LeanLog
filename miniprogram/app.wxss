@@ -18,9 +18,33 @@ button::after{
   border: none;
 }
 
-
 page {
-  background: #f6f6f6;
+  /* 主色调 */
+  --primary-color: #E8B4B8;
+  --primary-light: #F4E1E2;
+  --primary-dark: #B0A0BB;
+
+  /* 辅助色 */
+  --warning-color: #F5A623;
+  --danger-color: #FF6B6B;
+  --success-color: #34C759;
+
+  /* 背景色 */
+  --bg-color: #F7F9FC;
+  --bg-secondary: #EDF2F7;
+  --card-bg: #FFFFFF;
+  --page-bg-color: #f6f6f6;
+
+  /* 文字色 */
+  --text-primary: #1A1A1A;
+  --text-secondary: #666666;
+  --text-placeholder: #CCCCCC;
+  --text-hint: #999999;
+
+  /* 边框色 */
+  --border-color: #F5F7FA;
+
+  background: var(--page-bg-color);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
