@@ -1,0 +1,32 @@
+<!-- 悬浮菜单组件 -->
+<view class="float-menu-container" wx:if="{{ theme }}">
+  <!-- 悬浮工具按钮（可拖动） -->
+  <view
+    class="floating-btn {{ showMenu ? 'active' : '' }}"
+    style="left: {{ btnX }}px; top: {{ btnY }}px; background: linear-gradient(135deg, {{ theme.color }} 0%, {{ theme.lightColor }} 100%);"
+    catchtouchstart="onTouchStart"
+    catchtouchmove="onTouchMove"
+    catchtouchend="onTouchEnd"
+  >
+    <van-icon name="plus" size="24" color="#fff" />
+  </view>
+
+  <!-- 子菜单（动态扇形展开） -->
+  <view class="tool-menu {{ showMenu ? 'show' : '' }}" style="left: {{ btnX + 50 }}px; top: {{ btnY + 50 }}px;">
+    <view
+      wx:for="{{ menuItems }}"
+      wx:key="id"
+      class="tool-item tool-item-{{ index + 1 }}"
+      style="transform: {{ showMenu ? menuPositions[index] : 'scale(0)' }};"
+      bindtap="onMenuTap"
+      data-index="{{ index }}"
+    >
+      <view class="tool-icon" style="background: rgba(255,255,255,0.95); box-shadow: 0 4rpx 16rpx {{ theme.color }}40;">
+        <van-icon name="{{ item.icon }}" size="22" color="{{ theme.color }}" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 遮罩层 -->
+  <view class="tool-mask" wx:if="{{ showMenu }}" bindtap="closeMenu"></view>
+</view>

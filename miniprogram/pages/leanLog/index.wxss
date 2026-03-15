@@ -19,7 +19,6 @@
   left: 0;
   right: 0;
   height: 230rpx;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
   border-radius: 0 0 60rpx 60rpx;
 }
 
@@ -201,11 +200,98 @@
 .form-card .van-cell-group--inset {
   margin: 0 !important;
   border-radius: 16rpx !important;
+  border: none !important;
+  overflow: hidden;
+}
+
+.form-card .van-cell-group {
+  border: none !important;
+}
+
+.form-card .van-cell-group::before,
+.form-card .van-cell-group::after {
+  display: none !important;
 }
 
 .form-card .van-cell {
-  padding: 24rpx 20rpx !important;
+  padding: 0 20rpx !important;
   font-size: 28rpx !important;
+  height: 96rpx !important;
+  min-height: 96rpx !important;
+  line-height: 96rpx !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+}
+
+/* 饥饿感行自适应高度 */
+.form-card .hunger-cell {
+  height: auto !important;
+  min-height: auto !important;
+  line-height: normal !important;
+  padding: 20rpx !important;
+}
+
+.form-card .hunger-cell .van-cell__value {
+  height: auto !important;
+  min-height: auto !important;
+}
+
+.form-card .van-field {
+  padding: 0 20rpx !important;
+  min-height: 96rpx !important;
+  box-sizing: border-box !important;
+}
+
+/* textarea 类型的 field（饮食记录） */
+.form-card .diet-field {
+  height: auto !important;
+  min-height: 120rpx !important;
+}
+
+.form-card .diet-field .van-cell__value {
+  height: auto !important;
+  min-height: 80rpx !important;
+}
+
+.form-card .diet-field .van-field__body {
+  height: auto !important;
+  align-items: flex-start !important;
+  padding-top: 16rpx !important;
+}
+
+/* textarea 类型的 field（今日备注） */
+.form-card .notes-field {
+  height: auto !important;
+  min-height: 120rpx !important;
+}
+
+.form-card .notes-field .van-cell__value {
+  height: auto !important;
+  min-height: 80rpx !important;
+}
+
+.form-card .notes-field .van-field__body {
+  height: auto !important;
+  align-items: flex-start !important;
+  padding-top: 16rpx !important;
+}
+
+.form-card .van-field .van-cell__value {
+  min-height: 96rpx !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.form-card .van-field__body {
+  min-height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.form-card .van-field__label {
+  color: var(--text-secondary) !important;
+  font-weight: 500;
+  min-width: 140rpx !important;
 }
 
 .form-card .van-cell__title {
@@ -214,13 +300,32 @@
   min-width: 140rpx !important;
 }
 
+/* van-cell 右侧内容区域居中 */
+.form-card .van-cell__value {
+  height: 96rpx !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+}
+
+/* van-switch 居中 */
+.form-card .van-switch {
+  display: flex !important;
+  align-items: center !important;
+}
+
 .form-card .van-field__control {
   font-size: 28rpx !important;
   color: var(--text-primary) !important;
 }
 
 .form-card .van-field__control::placeholder {
-  color: var(--text-placeholder) !important;
+  color: #CCCCCC !important;
+}
+
+/* textarea placeholder 样式 */
+.form-card .van-field__placeholder {
+  color: #CCCCCC !important;
 }
 
 /* 按钮样式 */
@@ -236,12 +341,6 @@
 .form-card .van-rate {
   display: flex;
   gap: 8rpx;
-}
-
-/* 标签选中样式 */
-.form-card .van-tag--primary {
-  background-color: var(--primary-color) !important;
-  border-color: var(--primary-color) !important;
 }
 
 /* ==================== 运动类型选择弹窗 ==================== */
@@ -378,9 +477,8 @@
   align-items: center;
   justify-content: center;
   padding: 24rpx 0;
-  border: 2rpx dashed var(--primary-color);
+  border: 2rpx dashed;
   border-radius: 16rpx;
-  color: var(--primary-color);
   font-size: 28rpx;
   margin-top: 20rpx;
 }
@@ -464,4 +562,56 @@
 .sleep-duration-unit {
   font-size: 24rpx;
   color: var(--text-hint);
+}
+
+/* ==================== 主题选择弹窗 ==================== */
+.theme-picker {
+  background: var(--card-bg);
+  border-radius: 32rpx 32rpx 0 0;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.theme-list {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 20rpx 40rpx 40rpx;
+  gap: 30rpx;
+}
+
+.theme-item {
+  width: calc(33.33% - 20rpx);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.theme-color {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.theme-item.active .theme-color {
+  transform: scale(1.1);
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.15);
+}
+
+.theme-item:active .theme-color {
+  transform: scale(0.95);
+}
+
+.theme-name {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+}
+
+.theme-item.active .theme-name {
+  color: var(--text-primary);
+  font-weight: 500;
 }

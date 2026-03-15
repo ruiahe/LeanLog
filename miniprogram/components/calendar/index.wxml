@@ -1,0 +1,38 @@
+<!-- 自定义日历组件 -->
+<view class="calendar-container" wx:if="theme">
+  <!-- 月份切换 -->
+  <view class="calendar-header">
+    <view class="nav-btn" bindtap="prevMonth">
+      <van-icon name="arrow-left" size="18" color="{{ theme.color }}" />
+    </view>
+    <view class="month-title">{{ year }}年{{ month }}月</view>
+    <view class="nav-btn" bindtap="nextMonth">
+      <van-icon name="arrow-right" size="18" color="{{ theme.color }}" />
+    </view>
+  </view>
+
+  <!-- 星期标题 -->
+  <view class="weekdays">
+    <view class="weekday" wx:for="{{ weekdays }}" wx:key="index">{{ item }}</view>
+  </view>
+
+  <!-- 日期网格 -->
+  <view class="days-grid">
+    <view 
+      class="day-item {{ item.isCurrentMonth ? '' : 'other-month' }} {{ item.isToday ? 'today' : '' }} {{ item.isSelected ? 'selected' : '' }} {{ item.hasRecord ? 'has-record' : '' }} {{ item.isFuture ? 'future' : '' }}"
+      wx:for="{{ days }}" 
+      wx:key="dateStr"
+      bindtap="selectDay"
+      data-day="{{ item }}"
+    >
+      <view class="day-number" style="{{ item.isToday ? ('background: ' + theme.lightColor + '; color: ' + theme.color) : ''}} {{ item.isSelected ? ('background: ' + theme.color + '; color: #FFF;') : '' }}">{{ item.day }}</view>
+      <view class="day-dot" wx:if="{{ item.hasRecord }}"></view>
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="calendar-footer">
+    <view class="btn-cancel" bindtap="onCancel">取消</view>
+    <view class="btn-confirm" bindtap="onConfirm" style="background: {{ theme.color }}">确定</view>
+  </view>
+</view>

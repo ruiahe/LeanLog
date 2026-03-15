@@ -15,7 +15,9 @@
     "van-toast": "@vant/weapp/toast/index",
     "van-notify": "@vant/weapp/notify/index",
     "van-radio": "@vant/weapp/radio/index",
-    "van-radio-group": "@vant/weapp/radio-group/index"
+    "van-radio-group": "@vant/weapp/radio-group/index",
+    "calendar": "/components/calendar/index",
+    "float-menu": "/components/floatMenu/index"
   },
   "navigationBarTitleText": "减肥打卡"
 }

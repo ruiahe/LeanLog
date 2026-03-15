@@ -1,0 +1,275 @@
+/* 数据统计页面样式 */
+/* ==================== 页面容器 ==================== */
+.container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--bg-color) 0%, var(--bg-secondary) 100%);
+  padding-bottom: 40rpx;
+}
+
+/* ==================== 头部区域 ==================== */
+.header {
+  position: relative;
+  padding: 30rpx 60rpx 80rpx;
+  margin-bottom: 10rpx;
+}
+
+.header-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 230rpx;
+  border-radius: 0 0 60rpx 60rpx;
+}
+
+.header-content {
+  position: relative;
+  z-index: 1;
+  color: #FFFFFF;
+}
+
+.header-title {
+  font-size: 48rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  margin-bottom: 12rpx;
+  text-align: center;
+}
+
+.header-subtitle {
+  font-size: 24rpx;
+  opacity: 0.8;
+  text-align: center;
+}
+
+/* ==================== 统计容器 ==================== */
+.stats-container {
+  padding: 0 30rpx;
+  position: relative;
+  z-index: 2;
+}
+
+/* ==================== 时间范围选择器 ==================== */
+.time-range-selector {
+  display: flex;
+  background: var(--card-bg);
+  border-radius: 40rpx;
+  padding: 8rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.range-item {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  border-radius: 32rpx;
+  transition: all 0.3s ease;
+}
+
+.range-item.active {
+  background: var(--primary-color);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+/* ==================== 核心数据概览 ==================== */
+.overview-section {
+  margin-bottom: 30rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20rpx;
+  padding-left: 8rpx;
+}
+
+.overview-cards {
+  display: flex;
+  gap: 20rpx;
+}
+
+.overview-card {
+  flex: 1;
+  background: var(--card-bg);
+  border-radius: 24rpx;
+  padding: 30rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.card-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.weight-icon {
+  background: linear-gradient(135deg, #E8B4B8 0%, #F2D5D8 100%);
+  color: #FFFFFF;
+}
+
+.fat-icon {
+  background: linear-gradient(135deg, #5B8FF9 0%, #9BB8F7 100%);
+  color: #FFFFFF;
+}
+
+.card-info {
+  flex: 1;
+}
+
+.card-label {
+  font-size: 24rpx;
+  color: var(--text-hint);
+  margin-bottom: 8rpx;
+}
+
+.card-value {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.card-value .unit {
+  font-size: 24rpx;
+  font-weight: 400;
+  color: var(--text-hint);
+  margin-left: 4rpx;
+}
+
+.card-change {
+  font-size: 24rpx;
+  color: var(--text-hint);
+  margin-top: 8rpx;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.card-change.down {
+  color: #07C160;
+}
+
+.card-change.up {
+  color: #EE0A24;
+}
+
+/* ==================== 统计卡片 ==================== */
+.stats-section {
+  margin-bottom: 30rpx;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20rpx;
+}
+
+.stat-card {
+  background: var(--card-bg);
+  border-radius: 20rpx;
+  padding: 24rpx 16rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.stat-value {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: var(--text-hint);
+  margin-top: 8rpx;
+}
+
+/* ==================== 图表区域 ==================== */
+.chart-section {
+  margin-bottom: 30rpx;
+}
+
+.chart-container {
+  background: var(--card-bg);
+  border-radius: 24rpx;
+  padding: 30rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.04);
+  position: relative;
+}
+
+.chart-canvas {
+  width: 100%;
+  height: 400rpx;
+}
+
+.chart-tips {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 28rpx;
+  color: var(--text-hint);
+}
+
+/* ==================== 最近记录 ==================== */
+.recent-section {
+  margin-bottom: 30rpx;
+}
+
+.recent-list {
+  background: var(--card-bg);
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.04);
+}
+
+.recent-item {
+  padding: 30rpx;
+  border-bottom: 2rpx solid var(--border-color);
+}
+
+.recent-item:last-child {
+  border-bottom: none;
+}
+
+.recent-date {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16rpx;
+}
+
+.recent-data {
+  display: flex;
+  gap: 32rpx;
+}
+
+.data-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.data-label {
+  font-size: 24rpx;
+  color: var(--text-hint);
+}
+
+.data-value {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  font-weight: 500;
+}

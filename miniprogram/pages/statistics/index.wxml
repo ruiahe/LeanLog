@@ -1,0 +1,143 @@
+<!-- 数据统计页面 -->
+<view class="container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="header-bg" style="background: linear-gradient(135deg, {{ primaryColor }} 0%, {{ primaryColorLight }} 100%);"></view>
+    <view class="header-content">
+      <view class="header-title">数据统计</view>
+      <view class="header-subtitle">查看你的健康数据变化趋势</view>
+    </view>
+  </view>
+
+  <!-- 统计内容 -->
+  <view class="stats-container">
+    <!-- 时间范围选择 -->
+    <view class="time-range-selector">
+      <view
+        class="range-item {{ timeRange === 'week' ? 'active' : '' }}"
+        bindtap="changeTimeRange"
+        data-range="week"
+      >近7天</view>
+      <view
+        class="range-item {{ timeRange === 'month' ? 'active' : '' }}"
+        bindtap="changeTimeRange"
+        data-range="month"
+      >近30天</view>
+      <view
+        class="range-item {{ timeRange === 'all' ? 'active' : '' }}"
+        bindtap="changeTimeRange"
+        data-range="all"
+      >全部</view>
+    </view>
+
+    <!-- 加载状态 -->
+    <van-loading wx:if="{{ loading }}" size="24px" vertical>加载中...</van-loading>
+
+    <!-- 空状态 -->
+    <van-empty wx:elif="{{ !loading && records.length === 0 }}" description="暂无数据，快去打卡吧" />
+
+    <!-- 数据统计内容 -->
+    <block wx:else>
+      <!-- 核心数据概览 -->
+      <view class="overview-section">
+        <view class="section-title">核心数据</view>
+        <view class="overview-cards">
+          <!-- 当前体重 -->
+          <view class="overview-card">
+            <view class="card-icon weight-icon">
+              <van-icon name="balance-list-o" size="24" />
+            </view>
+            <view class="card-info">
+              <view class="card-label">当前体重</view>
+              <view class="card-value">{{ latestWeight || '--' }} <text class="unit">kg</text></view>
+              <view class="card-change {{ weightChange < 0 ? 'down' : weightChange > 0 ? 'up' : '' }}">
+                <van-icon name="{{ weightChange < 0 ? 'arrow-down' : weightChange > 0 ? 'arrow-up' : 'minus' }}" size="12" />
+                {{ weightChangeText }}
+              </view>
+            </view>
+          </view>
+          <!-- 体脂率 -->
+          <view class="overview-card">
+            <view class="card-icon fat-icon">
+              <van-icon name="percentage" size="24" />
+            </view>
+            <view class="card-info">
+              <view class="card-label">体脂率</view>
+              <view class="card-value">{{ latestBodyFat || '--' }} <text class="unit">%</text></view>
+              <view class="card-change {{ fatChange < 0 ? 'down' : fatChange > 0 ? 'up' : '' }}">
+                <van-icon name="{{ fatChange < 0 ? 'arrow-down' : fatChange > 0 ? 'arrow-up' : 'minus' }}" size="12" />
+                {{ fatChangeText }}
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 统计卡片 -->
+      <view class="stats-section">
+        <view class="section-title">打卡统计</view>
+        <view class="stats-cards">
+          <view class="stat-card">
+            <view class="stat-value">{{ totalDays }}</view>
+            <view class="stat-label">打卡天数</view>
+          </view>
+          <view class="stat-card">
+            <view class="stat-value">{{ exerciseDays }}</view>
+            <view class="stat-label">运动天数</view>
+          </view>
+          <view class="stat-card">
+            <view class="stat-value">{{ totalExerciseMinutes }}</view>
+            <view class="stat-label">运动时长(分)</view>
+          </view>
+          <view class="stat-card">
+            <view class="stat-value">{{ avgWater }}ml</view>
+            <view class="stat-label">平均饮水</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 体重趋势图 -->
+      <view class="chart-section">
+        <view class="section-title">体重趋势</view>
+        <view class="chart-container">
+          <canvas
+            canvas-id="weightChart"
+            id="weightChart"
+            class="chart-canvas"
+            bindtouchstart="touchChart"
+            bindtouchmove="touchChart"
+            bindtouchend="touchChart"
+          ></canvas>
+          <view class="chart-tips" wx:if="{{ chartData.length === 0 }}">暂无数据</view>
+        </view>
+      </view>
+
+      <!-- 最近记录 -->
+      <view class="recent-section">
+        <view class="section-title">最近记录</view>
+        <view class="recent-list">
+          <view class="recent-item" wx:for="{{ recentRecords }}" wx:key="_id" bindtap="viewRecord" data-id="{{ item._id }}">
+            <view class="recent-date">{{ item.date }}</view>
+            <view class="recent-data">
+              <view class="data-item">
+                <text class="data-label">体重</text>
+                <text class="data-value">{{ item.weight }}kg</text>
+              </view>
+              <view class="data-item" wx:if="{{ item.bodyFat }}">
+                <text class="data-label">体脂</text>
+                <text class="data-value">{{ item.bodyFat }}%</text>
+              </view>
+              <view class="data-item" wx:if="{{ item.exercise.exercised }}">
+                <text class="data-label">运动</text>
+                <text class="data-value">{{ item.exercise.totalDuration }}分钟</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- Notify 弱提示 -->
+  <van-notify id="van-notify" />
+</view>

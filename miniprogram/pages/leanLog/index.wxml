@@ -1,11 +1,11 @@
 <!-- 减肥打卡表单页面 -->
-<view class="container">
+<view class="container" wx:if="currentTheme">
   <!-- 页面头部 -->
   <view class="header">
-    <view class="header-bg"></view>
+    <view class="header-bg" style="background: linear-gradient(135deg, {{ currentTheme.color }} 0%, {{ currentTheme.lightColor }} 100%);"></view>
     <view class="header-content">
-      <view class="header-title">今日打卡</view>
-      <view class="header-tip">坚持就是胜利，记录每一天的改变</view>
+      <view class="header-title">{{ headerTitle }}</view>
+      <view class="header-tip">{{ headerSubtitle }}</view>
     </view>
   </view>
 
@@ -14,7 +14,7 @@
     <!-- 基础数据卡片 -->
     <view class="form-card">
       <view class="card-header">
-        <van-icon name="chart-trending-o" size="18" color="{{ primaryColor }}" />
+        <van-icon name="chart-trending-o" size="18" color="{{ currentTheme.color }}" />
         <text class="card-title">基础数据</text>
       </view>
       <van-cell-group inset>
@@ -51,7 +51,7 @@
       </view>
       <van-cell-group inset>
         <van-cell title="是否按计划饮食" border="{{ false }}">
-          <van-switch data-field="isHealthyDiet" checked="{{ isHealthyDiet }}" bind:change="onDataChange" active-color="{{ primaryColor }}" size="24px"/>
+          <van-switch data-field="isHealthyDiet" checked="{{ isHealthyDiet }}" bind:change="onDataChange" active-color="{{ currentTheme.color }}" size="24px"/>
         </van-cell>
         <van-field
           value="{{ water }}"
@@ -96,16 +96,16 @@
           <view slot="right-icon" class="unit">步</view>
         </van-field>
         <van-cell title="是否运动" border="{{ false }}">
-          <van-switch  data-field="exercised" checked="{{ exercised }}" bind:change="onDataChange" active-color="{{ primaryColor }}" size="24"/>
+          <van-switch  data-field="exercised" checked="{{ exercised }}" bind:change="onDataChange" active-color="{{ currentTheme.color }}" size="24"/>
         </van-cell>
 
         <!-- 有氧运动列表 -->
         <block wx:if="{{ exercised }}">
           <view wx:for="{{ exerciseList }}" wx:key="id" class="exercise-item">
             <view class="exercise-header">
-              <text class="exercise-label">运动 {{ index + 1 }}</text>
+              <text class="exercise-label" style="color: {{ currentTheme.color }}">运动 {{ index + 1 }}</text>
               <view wx:if="{{ exerciseList.length > 1 }}" class="exercise-remove" bindtap="removeExercise" data-index="{{ index }}">
-                <van-icon name="delete-o" size="16" color="#ff6b6b" />
+                <van-icon name="delete-o" size="16" color="{{ currentTheme.color }}" />
               </view>
             </view>
             <view class="exercise-content">
@@ -136,8 +136,8 @@
           </view>
 
           <!-- 添加运动按钮 -->
-          <view class="add-exercise-btn" bindtap="addExercise">
-            <van-icon name="plus" size="16" color="{{ primaryColor }}" />
+          <view class="add-exercise-btn" bindtap="addExercise" style="border-color: {{ currentTheme.color }}; color: {{ currentTheme.color }}">
+            <van-icon name="plus" size="16" color="{{ currentTheme.color }}" />
             <text>添加运动</text>
           </view>
         </block>
@@ -147,7 +147,7 @@
     <!-- 睡眠与状态卡片 -->
     <view class="form-card">
       <view class="card-header">
-        <van-icon name="moon-o" size="18" color="#8B5CF6" />
+        <van-icon name="closed-eye" size="18" color="#8B5CF6" />
         <text class="card-title">睡眠与状态</text>
       </view>
       <van-cell-group inset>
@@ -168,13 +168,14 @@
           <van-rate value="{{ mood }}" bind:change="onMoodChange" size="24" color="#F5A623" void-color="#E8E8E8" gutter="2"/>
         </van-cell>
         <!-- 饥饿感 -->
-        <van-cell title="饥饿感" border="{{ false }}" is-link="{{ false }}" clickable="{{ false }}">
+        <van-cell title="饥饿感" border="{{ false }}" is-link="{{ false }}" clickable="{{ false }}" custom-class="hunger-cell">
           <view class="hunger-tags">
             <van-tag
               wx:for="{{ hungerOptions }}"
               wx:key="index"
               size="medium"
-              type="{{ hunger === item.value ? 'primary' : 'default' }}"
+              type="default"
+              color="{{ hunger === item.value ? currentTheme.color : '' }}"
               custom-class="hunger-tag"
               catchtap="selectHunger"
               data-value="{{ item.value }}"
@@ -213,6 +214,7 @@
           border="{{ false }}"
           data-field="notes"
           bind:change="onDataChange"
+          custom-class="notes-field"
         />
       </van-cell-group>
     </view>
@@ -288,11 +290,24 @@
 
     <!-- 提交按钮 -->
     <view class="submit-area">
-      <van-button type="primary" block round bind:click="submitForm" color="{{ primaryColor }}">
+      <van-button type="primary" block round bind:click="submitForm" color="{{ currentTheme.color }}">
         保存打卡记录
       </van-button>
     </view>
   </view>
+
+  <!-- 日期选择弹窗 -->
+  <van-popup show="{{ showDatePickerPopup }}" position="bottom" round custom-style="overflow: visible;">
+    <calendar
+      selected-date="{{ currentDateTimestamp }}"
+      record-dates="{{ recordDates }}"
+      min-date="{{ minDate }}"
+      max-date="{{ maxDate }}"
+      theme="{{ currentTheme }}"
+      bind:confirm="onDateConfirm"
+      bind:cancel="onDateCancel"
+    />
+  </van-popup>
 
   <!-- 运动分类选择弹窗（第一步） -->
   <van-popup show="{{ showExerciseCategoryPopup }}" position="bottom" round custom-style="overflow: visible;">
@@ -311,6 +326,7 @@
           bindtap="selectExerciseCategory"
           data-value="{{ item.value }}"
           data-label="{{ item.label }}"
+          style="{{ exerciseList[currentExerciseIndex].category === item.value ? 'color: ' + currentTheme.color : ''}}"
         >
           <text>{{ item.label }}</text>
           <van-icon name="arrow" size="16" color="#999" />
@@ -342,7 +358,7 @@
           data-label="{{ item.label }}"
         >
           <text>{{ item.label }}</text>
-          <van-icon wx:if="{{ currentExerciseIndex !== null && exerciseList[currentExerciseIndex].type === item.value }}" name="success" color="{{ primaryColor }}" />
+          <van-icon wx:if="{{ currentExerciseIndex !== null && exerciseList[currentExerciseIndex].type === item.value }}" name="success" color="{{ currentTheme.color }}" />
         </view>
       </view>
       
@@ -360,7 +376,7 @@
           <van-button 
             type="primary" 
             size="small" 
-            color="{{ primaryColor }}"
+            color="{{ currentTheme.color }}"
             bind:click="confirmCustomExercise"
             custom-class="custom-confirm-btn"
           >
@@ -371,16 +387,30 @@
     </view>
   </van-popup>
 
-  <!-- 日期选择器弹窗 -->
-  <van-popup show="{{ showDatePickerPopup }}" position="bottom" round>
-    <van-datetime-picker
-      type="datetime"
-      value="{{ currentDateTimestamp }}"
-      min-date="{{ minDate }}"
-      max-date="{{ maxDate }}"
-      bind:confirm="onDateConfirm"
-      bind:cancel="onDateCancel"
-    />
+  <!-- 主题选择弹窗 -->
+  <van-popup show="{{ showThemePopup }}" position="bottom" round custom-style="overflow: visible;">
+    <view class="theme-picker">
+      <view class="picker-header">
+        <text class="picker-title">选择主题色</text>
+        <view class="picker-close" bindtap="hideThemePopup">
+          <van-icon name="cross" size="20" />
+        </view>
+      </view>
+      <view class="theme-list">
+        <view
+          wx:for="{{ themes }}"
+          wx:key="id"
+          class="theme-item {{ currentThemeId === item.id ? 'active' : '' }}"
+          bindtap="selectTheme"
+          data-id="{{ item.id }}"
+        >
+          <view class="theme-color" style="background: {{ item.color }};">
+            <van-icon wx:if="{{ currentThemeId === item.id }}" name="success" color="#fff" size="16" />
+          </view>
+          <text class="theme-name">{{ item.name }}</text>
+        </view>
+      </view>
+    </view>
   </van-popup>
 
   <!-- Toast 提示 -->
@@ -388,4 +418,12 @@
 
   <!-- Notify 弱提示 -->
   <van-notify id="van-notify" />
+
+  <!-- 悬浮菜单组件 -->
+  <float-menu
+    id="floatMenu"
+    theme="{{ currentTheme }}"
+    menu-items="{{ floatMenuItems }}"
+    bind:menutap="onFloatMenuTap"
+  />
 </view>
