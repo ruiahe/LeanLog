@@ -1,0 +1,99 @@
+/* 运动类型选择弹窗组件样式 */
+
+/* ==================== 弹窗容器 ==================== */
+.exercise-picker {
+  background: var(--card-bg);
+  border-radius: 32rpx 32rpx 0 0;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ==================== 弹窗头部 ==================== */
+.picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx 40rpx;
+  border-bottom: 2rpx solid var(--border-color);
+}
+
+.picker-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+  text-align: center;
+}
+
+.picker-close {
+  padding: 10rpx;
+}
+
+.picker-back {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 10rpx;
+  color: var(--text-secondary);
+  font-size: 28rpx;
+}
+
+/* ==================== 选项列表 ==================== */
+.picker-options {
+  padding: 20rpx 40rpx 0;
+}
+
+.picker-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx 20rpx;
+  border-bottom: 2rpx solid var(--border-color);
+  font-size: 30rpx;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.picker-option:last-child {
+  border-bottom: none;
+}
+
+.picker-option.active {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+/* ==================== 自定义运动类型输入区域 ==================== */
+.custom-input-area {
+  padding: 30rpx 40rpx;
+  border-top: 2rpx solid var(--border-color);
+  background: var(--bg-secondary);
+}
+
+.custom-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.custom-input {
+  flex: 1;
+  height: 72rpx;
+  background: var(--card-bg);
+  border: 2rpx solid var(--border-color);
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  color: var(--text-primary);
+}
+
+.custom-input:focus {
+  border-color: var(--primary-color);
+}
+
+.custom-confirm-btn {
+  flex-shrink: 0 !important;
+  height: 72rpx !important;
+  line-height: 72rpx !important;
+  padding: 0 32rpx !important;
+  border-radius: 12rpx !important;
+}

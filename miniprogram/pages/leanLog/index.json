@@ -17,7 +17,9 @@
     "van-radio": "@vant/weapp/radio/index",
     "van-radio-group": "@vant/weapp/radio-group/index",
     "calendar": "/components/calendar/index",
-    "float-menu": "/components/floatMenu/index"
+    "float-menu": "/components/floatMenu/index",
+    "theme-picker": "/components/themePicker/index",
+    "exercise-picker": "/components/exercisePicker/index"
   },
   "navigationBarTitleText": "减肥打卡"
 }

@@ -343,55 +343,6 @@
   gap: 8rpx;
 }
 
-/* ==================== 运动类型选择弹窗 ==================== */
-.exercise-picker {
-  background: var(--card-bg);
-  border-radius: 32rpx 32rpx 0 0;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.picker-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 32rpx 40rpx;
-  border-bottom: 2rpx solid var(--border-color);
-}
-
-.picker-title {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.picker-close {
-  padding: 10rpx;
-}
-
-.picker-options {
-  padding: 20rpx 40rpx 0;
-}
-
-.picker-option {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 32rpx 20rpx;
-  border-bottom: 2rpx solid var(--border-color);
-  font-size: 30rpx;
-  color: var(--text-primary);
-  transition: all 0.2s ease;
-}
-
-.picker-option:last-child {
-  border-bottom: none;
-}
-
-.picker-option.active {
-  color: var(--primary-color);
-  font-weight: 500;
-}
-
 /* ==================== 运动项样式 ==================== */
 .exercise-item {
   background: var(--bg-secondary);
@@ -487,48 +438,6 @@
   margin-left: 8rpx;
 }
 
-/* ==================== 自定义运动类型输入区域 ==================== */
-.custom-input-area {
-  padding: 30rpx 40rpx;
-  border-top: 2rpx solid var(--border-color);
-  background: var(--bg-secondary);
-}
-
-.custom-input-label {
-  font-size: 28rpx;
-  color: var(--text-secondary);
-  margin-bottom: 20rpx;
-}
-
-.custom-input-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-}
-
-.custom-input {
-  flex: 1;
-  height: 72rpx;
-  background: var(--card-bg);
-  border: 2rpx solid var(--border-color);
-  border-radius: 12rpx;
-  padding: 0 24rpx;
-  font-size: 28rpx;
-  color: var(--text-primary);
-}
-
-.custom-input:focus {
-  border-color: var(--primary-color);
-}
-
-.custom-confirm-btn {
-  flex-shrink: 0 !important;
-  height: 72rpx !important;
-  line-height: 72rpx !important;
-  padding: 0 32rpx !important;
-  border-radius: 12rpx !important;
-}
-
 /* ==================== 睡眠时长调节器 ==================== */
 .sleep-duration-wrapper {
   display: flex;
@@ -564,54 +473,3 @@
   color: var(--text-hint);
 }
 
-/* ==================== 主题选择弹窗 ==================== */
-.theme-picker {
-  background: var(--card-bg);
-  border-radius: 32rpx 32rpx 0 0;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.theme-list {
-  display: flex;
-  flex-wrap: wrap;
-  padding: 20rpx 40rpx 40rpx;
-  gap: 30rpx;
-}
-
-.theme-item {
-  width: calc(33.33% - 20rpx);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16rpx;
-}
-
-.theme-color {
-  width: 100rpx;
-  height: 100rpx;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.theme-item.active .theme-color {
-  transform: scale(1.1);
-  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.15);
-}
-
-.theme-item:active .theme-color {
-  transform: scale(0.95);
-}
-
-.theme-name {
-  font-size: 24rpx;
-  color: var(--text-secondary);
-}
-
-.theme-item.active .theme-name {
-  color: var(--text-primary);
-  font-weight: 500;
-}

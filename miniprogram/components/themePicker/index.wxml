@@ -1,0 +1,25 @@
+<!-- 主题选择弹窗组件 -->
+<van-popup show="{{ show }}" position="bottom" round custom-style="overflow: visible;" bind:close="onClose">
+  <view class="theme-picker">
+    <view class="picker-header">
+      <text class="picker-title">选择主题色</text>
+      <view class="picker-close" bindtap="onClose">
+        <van-icon name="cross" size="20" />
+      </view>
+    </view>
+    <view class="theme-list">
+      <view
+        wx:for="{{ themes }}"
+        wx:key="id"
+        class="theme-item {{ currentThemeId === item.id ? 'active' : '' }}"
+        bindtap="onSelectTheme"
+        data-id="{{ item.id }}"
+      >
+        <view class="theme-color" style="background: {{ item.color }};">
+          <van-icon wx:if="{{ currentThemeId === item.id }}" name="success" color="#fff" size="16" />
+        </view>
+        <text class="theme-name">{{ item.name }}</text>
+      </view>
+    </view>
+  </view>
+</van-popup>

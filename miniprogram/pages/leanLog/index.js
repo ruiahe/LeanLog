@@ -1,12 +1,14 @@
-const { THEME_CONFIG, FLOAT_MENU } = require('../../constants/index');
+const { THEME_CONFIG, FLOAT_MENU, MANIFESTO } = require('../../constants/index');
 const { getThemeById } = require('../../utils/index');
 
 Page({
   data: {
     // 主题选择
     showThemePopup: false,
-    themes: THEME_CONFIG.THEMES,
     currentTheme: null,
+
+    // 副标题 - 宣言
+    headerSubtitle: MANIFESTO,
 
     currentDate: '', // 当前日期
     currentDateTimestamp: new Date().getTime(),
@@ -56,37 +58,9 @@ Page({
     showExerciseTypePopup: false,
     showExerciseCategoryPopup: false, // 是否显示运动分类弹窗
     currentExerciseIndex: null, // 当前正在编辑的运动项索引
-    customExerciseType: '', // 自定义运动类型输入
-    showCustomInput: false, // 是否显示自定义输入框
     exerciseList: [
       { id: 1, type: '', typeLabel: '', typeName: '', duration: 30 }
     ],
-    // 运动分类
-    exerciseCategories: [
-      { label: '有氧运动', value: '1' },
-      { label: '无氧运动', value: '2' }
-    ],
-    // 运动项目（按分类）
-    exerciseTypesByCategory: {
-      '1': [
-        { label: '快走', value: 'walk' },
-        { label: '慢跑', value: 'jog' },
-        { label: '游泳', value: 'swim' },
-        { label: '骑行', value: 'cycle' },
-        { label: '跳绳', value: 'rope' },
-        { label: '瑜伽', value: 'yoga' },
-        { label: '其他有氧', value: 'other_aerobic' }
-      ],
-      '2': [
-        { label: '力量训练', value: 'strength' },
-        { label: '举重', value: 'weightlifting' },
-        { label: '俯卧撑', value: 'pushup' },
-        { label: '深蹲', value: 'squat' },
-        { label: '引体向上', value: 'pullup' },
-        { label: '平板支撑', value: 'plank' },
-        { label: '其他无氧', value: 'other_anaerobic' }
-      ]
-    },
 
     // 状态评估
     mood: 3,
@@ -100,19 +74,16 @@ Page({
     ],
     sleepDuration: 7, // 昨夜睡眠时长（小时）
     notes: '',
-
-    // 头部文案
-    headerTitle: '今日打卡',
-    headerSubtitle: '坚持就是胜利，记录每一天的改变'
   },
 
   onLoad(options) {
-    console.log("------")
+    // 尝试获取本地缓存的用户信息
+    this.loadCachedUserInfo();
+
     // 加载保存的主题
     this.loadSavedTheme();
     this.initCurrentDate();
-    // 尝试获取本地缓存的用户信息
-    this.loadCachedUserInfo();
+    
     // 动态引入 Toast 和 Notify
     try {
       const toastModule = require('../../miniprogram_npm/@vant/weapp/toast/toast');
@@ -128,6 +99,14 @@ Page({
     this.checkTodayRecord();
     // 获取所有有记录的日期
     this.fetchRecordDates();
+  },
+
+  // 加载本地缓存的用户信息
+  loadCachedUserInfo() {
+    const cachedUserInfo = wx.getStorageSync('userInfo');
+    if (cachedUserInfo) {
+      this.setData({ userInfo: cachedUserInfo });
+    }
   },
 
   // 加载保存的主题
@@ -149,17 +128,23 @@ Page({
     }
   },
 
-  // 选择主题
-  selectTheme(e) {
-    const themeId = e.currentTarget.dataset.id;
-    const theme = this.data.themes.find(t => t.id === themeId);
+  // 主题切换事件（由组件触发）
+  onThemeChange(e) {
+    const { themeId, theme } = e.detail;
     if (theme) {
-      this.setData({currentTheme: theme});
+      this.setData({ currentTheme: theme });
       // 保存主题设置
       wx.setStorageSync('themeId', themeId);
       this.showNotify('主题已切换为' + theme.name, 'success');
-      this.closeDialog('theme');
+      this.setData({ showThemePopup: false });
     }
+  },
+
+  // 初始化当前日期
+  initCurrentDate() {
+    this.setData({
+      currentDateTimestamp: new Date().getTime()
+    });
   },
 
   // 打开弹框
@@ -201,11 +186,6 @@ Page({
     this.setData({ showThemePopup: true });
   },
 
-  // 隐藏主题选择弹窗
-  hideThemePopup() {
-    this.setData({ showThemePopup: false });
-  },
-
   // 获取所有有记录的日期
   fetchRecordDates() {
     const self = this;
@@ -225,14 +205,6 @@ Page({
       .catch(function(err) {
         console.error('获取记录日期失败：', err);
       });
-  },
-
-  // 加载本地缓存的用户信息
-  loadCachedUserInfo() {
-    const cachedUserInfo = wx.getStorageSync('userInfo');
-    if (cachedUserInfo) {
-      this.setData({ userInfo: cachedUserInfo });
-    }
   },
 
   // 获取用户信息（返回 Promise）
@@ -309,25 +281,6 @@ Page({
     }
   },
 
-  // 初始化当前日期
-  initCurrentDate() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-
-    this.setData({
-      currentDate: `${year}年${month}月${day}日`,
-      recordTime: `${month}-${day} ${hours}:${minutes}`,
-      currentDateTimestamp: now.getTime(),
-      selectedDateLabel: '今天',
-      headerTitle: '今日打卡',
-      headerSubtitle: '坚持就是胜利，记录每一天的改变'
-    });
-  },
-
   // 格式化日期为 YYYY-MM-DD
   formatDateToYMD(date) {
     const year = date.getFullYear();
@@ -356,30 +309,6 @@ Page({
     const month = date.getMonth() + 1;
     const day = date.getDate();
     return `${month}月${day}日`;
-  },
-
-  // 更新头部文案
-  updateHeaderTitle(dateLabel, isEditing, hasRecord) {
-    let title = '';
-
-    if (dateLabel === '今天') {
-      if (isEditing) {
-        title = '编辑今日打卡';
-      } else {
-        title = '今日打卡';
-      }
-    } else {
-      if (isEditing) {
-        title = `编辑${dateLabel}记录`;
-      } else {
-        title = `${dateLabel}打卡`;
-      }
-    }
-
-    this.setData({
-      headerTitle: title,
-      headerSubtitle: '坚持就是胜利，记录每一天的改变'
-    });
   },
 
   // 检查今天是否已有记录
@@ -451,9 +380,6 @@ Page({
       arm: record.measurements && record.measurements.arm ? String(record.measurements.arm) : '',
       thigh: record.measurements && record.measurements.thigh ? String(record.measurements.thigh) : ''
     });
-
-    // 更新头部文案
-    this.updateHeaderTitle(this.data.selectedDateLabel, true, true);
   },
 
   // 显示日期选择器
@@ -499,8 +425,6 @@ Page({
             isEditing: false,
             editingRecordId: null
           });
-          // 更新头部文案（新建模式）
-          self.updateHeaderTitle(dateLabel, false, false);
         }
       })
       .catch(function(err) {
@@ -543,7 +467,7 @@ Page({
     this.setData({ exercised: e.detail });
   },
 
-  // 显示运动分类选择弹窗（第一步）
+  // 显示运动分类选择弹窗
   showExerciseTypePicker(e) {
     var index = e.currentTarget.dataset.index;
     this.setData({
@@ -557,34 +481,36 @@ Page({
     this.setData({ showExerciseCategoryPopup: false });
   },
 
-  // 返回运动分类选择
+  // 隐藏运动类型弹窗
+  hideExerciseTypePicker() {
+    this.setData({ showExerciseTypePopup: false });
+  },
+
+  // 返回运动分类选择（由组件触发）
   backToCategory() {
     this.setData({
       showExerciseTypePopup: false,
-      showExerciseCategoryPopup: true,
-      showCustomInput: false,
-      customExerciseType: ''
+      showExerciseCategoryPopup: true
     });
   },
 
-  // 选择运动分类（有氧/无氧），显示具体运动列表
-  selectExerciseCategory(e) {
-    var categoryValue = e.currentTarget.dataset.value;
-    var categoryLabel = e.currentTarget.dataset.label;
+  // 选择运动分类（由组件触发）
+  onSelectCategory(e) {
+    const { category, categoryName } = e.detail;
     var currentExerciseIndex = this.data.currentExerciseIndex;
     var exerciseList = this.data.exerciseList;
 
-    // 更新当前运动项的分类信息
     if (currentExerciseIndex !== null) {
       var newList = exerciseList.slice();
+      var currentItem = newList[currentExerciseIndex];
       newList[currentExerciseIndex] = {
-        id: newList[currentExerciseIndex].id,
-        category: categoryValue,
-        categoryName: categoryLabel,
+        id: currentItem.id,
+        category: category,
+        categoryName: categoryName,
         type: '',
         typeLabel: '',
-        typeName: categoryLabel,
-        duration: newList[currentExerciseIndex].duration
+        typeName: categoryName,
+        duration: currentItem.duration
       };
       this.setData({
         exerciseList: newList,
@@ -594,33 +520,11 @@ Page({
     }
   },
 
-  // 隐藏运动类型弹窗
-  hideExerciseTypePicker() {
-    this.setData({
-      showExerciseTypePopup: false,
-      showCustomInput: false,
-      customExerciseType: ''
-    });
-  },
-
-  // 选择具体运动类型
-  selectExerciseType(e) {
-    var value = e.currentTarget.dataset.value;
-    var label = e.currentTarget.dataset.label;
+  // 选择运动类型（由组件触发）
+  onSelectType(e) {
+    const { type, typeLabel, isCustom } = e.detail;
     var currentExerciseIndex = this.data.currentExerciseIndex;
     var exerciseList = this.data.exerciseList;
-
-    // 判断是否是"其他"类型，需要显示输入框
-    if (value === 'other_aerobic' || value === 'other_anaerobic') {
-      this.setData({
-        showCustomInput: true,
-        customExerciseType: ''
-      });
-      return;
-    }
-
-    // 隐藏自定义输入框
-    this.setData({ showCustomInput: false });
 
     if (currentExerciseIndex !== null) {
       var newList = exerciseList.slice();
@@ -629,58 +533,17 @@ Page({
         id: currentItem.id,
         category: currentItem.category,
         categoryName: currentItem.categoryName,
-        type: value,
-        typeLabel: label,
+        type: type,
+        typeLabel: typeLabel,
         typeName: currentItem.categoryName,
-        duration: currentItem.duration
+        duration: currentItem.duration,
+        isCustom: isCustom || false
       };
       this.setData({
         exerciseList: newList,
         showExerciseTypePopup: false
       });
     }
-  },
-
-  // 自定义运动类型输入
-  onCustomExerciseInput(e) {
-    this.setData({
-      customExerciseType: e.detail.value
-    });
-  },
-
-  // 确认自定义运动类型
-  confirmCustomExercise() {
-    var customType = this.data.customExerciseType.trim();
-    if (!customType) {
-      this.showToast('请输入运动类型');
-      return;
-    }
-
-    var currentExerciseIndex = this.data.currentExerciseIndex;
-    var exerciseList = this.data.exerciseList;
-    var currentItem = exerciseList[currentExerciseIndex];
-
-    // 根据分类确定是其他有氧还是其他无氧
-    var typeValue = currentItem.category === '1' ? 'other_aerobic' : 'other_anaerobic';
-
-    var newList = exerciseList.slice();
-    newList[currentExerciseIndex] = {
-      id: currentItem.id,
-      category: currentItem.category,
-      categoryName: currentItem.categoryName,
-      type: typeValue,
-      typeLabel: customType, // 使用用户输入的自定义名称
-      typeName: currentItem.categoryName,
-      duration: currentItem.duration,
-      isCustom: true // 标记为自定义类型
-    };
-
-    this.setData({
-      exerciseList: newList,
-      showExerciseTypePopup: false,
-      showCustomInput: false,
-      customExerciseType: ''
-    });
   },
 
   // 运动时长变化（滑块）

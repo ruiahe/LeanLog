@@ -1,0 +1,85 @@
+/**
+ * WXS 工具函数 - 标题生成
+ * 用于在 wxml 中根据时间戳生成标题
+ */
+
+/**
+ * 格式化日期为 YYYY-MM-DD
+ * @param {Date} date 日期对象
+ * @returns {string} 格式化后的日期字符串
+ */
+var formatDateToYMD = function(date) {
+  var year = date.getFullYear();
+  var month = date.getMonth() + 1;
+  var day = date.getDate();
+  
+  // 补零
+  if (month < 10) {
+    month = '0' + month;
+  }
+  if (day < 10) {
+    day = '0' + day;
+  }
+  
+  return year + '-' + month + '-' + day;
+};
+
+/**
+ * 获取日期标签（今天/昨天/X月X日）
+ * @param {number} timestamp 时间戳
+ * @returns {string} 日期标签
+ */
+var getDateLabel = function(timestamp) {
+  var date = getDate(timestamp);
+  var today = getDate();
+  var todayYMD = formatDateToYMD(today);
+  var targetYMD = formatDateToYMD(date);
+  
+  if (todayYMD === targetYMD) {
+    return '今天';
+  }
+  
+  // 计算昨天
+  var yesterday = getDate(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+  var yesterdayYMD = formatDateToYMD(yesterday);
+  if (yesterdayYMD === targetYMD) {
+    return '昨天';
+  }
+  
+  var month = date.getMonth() + 1;
+  var day = date.getDate();
+  return month + '月' + day + '日';
+};
+
+/**
+ * 根据时间戳获取标题
+ * @param {number} timestamp 时间戳
+ * @param {boolean} isEditing 是否编辑模式
+ * @returns {string} 标题
+ */
+var getTitle = function(timestamp, isEditing) {
+  var dateLabel = getDateLabel(timestamp);
+  var title = '';
+  
+  if (dateLabel === '今天') {
+    if (isEditing) {
+      title = '编辑今日打卡';
+    } else {
+      title = '今日打卡';
+    }
+  } else {
+    if (isEditing) {
+      title = '编辑' + dateLabel + '记录';
+    } else {
+      title = dateLabel + '打卡';
+    }
+  }
+  
+  return title;
+};
+
+module.exports = {
+  getTitle: getTitle,
+  getDateLabel: getDateLabel,
+  formatDateToYMD: formatDateToYMD
+};

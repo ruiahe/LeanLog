@@ -3,6 +3,9 @@
  * 存放应用中使用的固定常量
  */
 
+// 宣言
+const MANIFESTO = "坚持就是胜利，记录每一天的改变";
+
 // ==================== 颜色和主题配置 ====================
 const THEME_CONFIG = {
   // 默认主题色ID
@@ -30,6 +33,7 @@ const FLOAT_MENU = {
 };
 
 module.exports = {
+  MANIFESTO,
   THEME_CONFIG,
   FLOAT_MENU
 };

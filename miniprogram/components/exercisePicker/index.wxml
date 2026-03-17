@@ -1,0 +1,78 @@
+<!-- 运动分类选择弹窗组件 -->
+<!-- 第一步：选择运动分类（有氧/无氧） -->
+<van-popup show="{{ showCategory }}" position="bottom" round custom-style="overflow: visible;" bind:close="onCloseCategory">
+  <view class="exercise-picker">
+    <view class="picker-header">
+      <text class="picker-title">选择运动分类</text>
+      <view class="picker-close" bindtap="onCloseCategory">
+        <van-icon name="cross" size="20" />
+      </view>
+    </view>
+    <view class="picker-options">
+      <view
+        wx:for="{{ exerciseCategories }}"
+        wx:key="value"
+        class="picker-option {{ currentExercise.category === item.value ? 'active' : '' }}"
+        bindtap="onSelectCategory"
+        data-value="{{ item.value }}"
+        data-label="{{ item.label }}"
+        style="{{ currentExercise.category === item.value ? 'color: ' + themeColor : ''}}"
+      >
+        <text>{{ item.label }}</text>
+        <van-icon name="arrow" size="16" color="#999" />
+      </view>
+    </view>
+  </view>
+</van-popup>
+
+<!-- 第二步：选择具体运动类型 -->
+<van-popup show="{{ showType }}" position="bottom" round custom-style="overflow: visible;" bind:close="onCloseType">
+  <view class="exercise-picker">
+    <view class="picker-header">
+      <view class="picker-back" bindtap="onBackToCategory">
+        <van-icon name="arrow-left" size="18" />
+        <text>返回</text>
+      </view>
+      <text class="picker-title">{{ currentExercise.categoryName || '选择运动' }}</text>
+      <view class="picker-close" bindtap="onCloseType">
+        <van-icon name="cross" size="20" />
+      </view>
+    </view>
+    <view class="picker-options">
+      <view
+        wx:for="{{ exerciseTypesByCategory[currentExercise.category] }}"
+        wx:key="value"
+        class="picker-option {{ currentExercise.type === item.value ? 'active' : '' }}"
+        bindtap="onSelectType"
+        data-value="{{ item.value }}"
+        data-label="{{ item.label }}"
+      >
+        <text>{{ item.label }}</text>
+        <van-icon wx:if="{{ currentExercise.type === item.value }}" name="success" color="{{ themeColor }}" />
+      </view>
+    </view>
+    
+    <!-- 自定义运动类型输入区域 -->
+    <view wx:if="{{ showCustomInput }}" class="custom-input-area">
+      <view class="custom-input-wrapper">
+        <input 
+          class="custom-input"
+          type="text"
+          value="{{ customExerciseType }}"
+          placeholder="请输入运动类型"
+          bindinput="onCustomInput"
+          maxlength="20"
+        />
+        <van-button 
+          type="primary" 
+          size="small" 
+          color="{{ themeColor }}"
+          bind:click="onConfirmCustom"
+          custom-class="custom-confirm-btn"
+        >
+          确认
+        </van-button>
+      </view>
+    </view>
+  </view>
+</van-popup>

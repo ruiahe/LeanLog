@@ -1,0 +1,68 @@
+/* 主题选择弹窗组件样式 */
+.theme-picker {
+  background: var(--card-bg);
+  border-radius: 32rpx 32rpx 0 0;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx 40rpx;
+  border-bottom: 2rpx solid var(--border-color);
+}
+
+.picker-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.picker-close {
+  padding: 10rpx;
+}
+
+.theme-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 20rpx 40rpx 40rpx;
+  gap: 30rpx;
+}
+
+.theme-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.theme-color {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.theme-item.active .theme-color {
+  transform: scale(1.1);
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.15);
+}
+
+.theme-item:active .theme-color {
+  transform: scale(0.95);
+}
+
+.theme-name {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+}
+
+.theme-item.active .theme-name {
+  color: var(--text-primary);
+  font-weight: 500;
+}

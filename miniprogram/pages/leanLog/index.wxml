@@ -1,10 +1,11 @@
 <!-- 减肥打卡表单页面 -->
+<wxs src="../../utils/filters.wxs" module="filters" />
 <view class="container" wx:if="currentTheme">
   <!-- 页面头部 -->
   <view class="header">
     <view class="header-bg" style="background: linear-gradient(135deg, {{ currentTheme.color }} 0%, {{ currentTheme.lightColor }} 100%);"></view>
     <view class="header-content">
-      <view class="header-title">{{ headerTitle }}</view>
+      <view class="header-title">{{ filters.getTitle(currentDateTimestamp, isEditing) }}</view>
       <view class="header-tip">{{ headerSubtitle }}</view>
     </view>
   </view>
@@ -309,109 +310,26 @@
     />
   </van-popup>
 
-  <!-- 运动分类选择弹窗（第一步） -->
-  <van-popup show="{{ showExerciseCategoryPopup }}" position="bottom" round custom-style="overflow: visible;">
-    <view class="exercise-picker">
-      <view class="picker-header">
-        <text class="picker-title">选择运动分类</text>
-        <view class="picker-close" bindtap="hideExerciseCategoryPopup">
-          <van-icon name="cross" size="20" />
-        </view>
-      </view>
-      <view class="picker-options">
-        <view
-          wx:for="{{ exerciseCategories }}"
-          wx:key="value"
-          class="picker-option {{ currentExerciseIndex !== null && exerciseList[currentExerciseIndex].category === item.value ? 'active' : '' }}"
-          bindtap="selectExerciseCategory"
-          data-value="{{ item.value }}"
-          data-label="{{ item.label }}"
-          style="{{ exerciseList[currentExerciseIndex].category === item.value ? 'color: ' + currentTheme.color : ''}}"
-        >
-          <text>{{ item.label }}</text>
-          <van-icon name="arrow" size="16" color="#999" />
-        </view>
-      </view>
-    </view>
-  </van-popup>
-
-  <!-- 运动类型选择弹窗（第二步） -->
-  <van-popup show="{{ showExerciseTypePopup }}" position="bottom" round custom-style="overflow: visible;">
-    <view class="exercise-picker">
-      <view class="picker-header">
-        <view class="picker-back" bindtap="backToCategory">
-          <van-icon name="arrow-left" size="18" />
-          <text>返回</text>
-        </view>
-        <text class="picker-title">{{ exerciseList[currentExerciseIndex].categoryName || '选择运动' }}</text>
-        <view class="picker-close" bindtap="hideExerciseTypePicker">
-          <van-icon name="cross" size="20" />
-        </view>
-      </view>
-      <view class="picker-options">
-        <view
-          wx:for="{{ exerciseTypesByCategory[exerciseList[currentExerciseIndex].category] }}"
-          wx:key="value"
-          class="picker-option {{ currentExerciseIndex !== null && exerciseList[currentExerciseIndex].type === item.value ? 'active' : '' }}"
-          bindtap="selectExerciseType"
-          data-value="{{ item.value }}"
-          data-label="{{ item.label }}"
-        >
-          <text>{{ item.label }}</text>
-          <van-icon wx:if="{{ currentExerciseIndex !== null && exerciseList[currentExerciseIndex].type === item.value }}" name="success" color="{{ currentTheme.color }}" />
-        </view>
-      </view>
-      
-      <!-- 自定义运动类型输入区域 -->
-      <view wx:if="{{ showCustomInput }}" class="custom-input-area">
-        <view class="custom-input-wrapper">
-          <input 
-            class="custom-input"
-            type="text"
-            value="{{ customExerciseType }}"
-            placeholder="请输入运动类型"
-            bindinput="onCustomExerciseInput"
-            maxlength="20"
-          />
-          <van-button 
-            type="primary" 
-            size="small" 
-            color="{{ currentTheme.color }}"
-            bind:click="confirmCustomExercise"
-            custom-class="custom-confirm-btn"
-          >
-            确认
-          </van-button>
-        </view>
-      </view>
-    </view>
-  </van-popup>
+  <!-- 运动类型选择弹窗 -->
+  <exercise-picker
+    show-category="{{ showExerciseCategoryPopup }}"
+    show-type="{{ showExerciseTypePopup }}"
+    current-exercise="{{ currentExerciseIndex !== null ? exerciseList[currentExerciseIndex] : null }}"
+    theme-color="{{ currentTheme.color }}"
+    bind:selectcategory="onSelectCategory"
+    bind:selecttype="onSelectType"
+    bind:backtocategory="backToCategory"
+    bind:closecategory="hideExerciseCategoryPopup"
+    bind:closetype="hideExerciseTypePicker"
+  />
 
   <!-- 主题选择弹窗 -->
-  <van-popup show="{{ showThemePopup }}" position="bottom" round custom-style="overflow: visible;">
-    <view class="theme-picker">
-      <view class="picker-header">
-        <text class="picker-title">选择主题色</text>
-        <view class="picker-close" bindtap="hideThemePopup">
-          <van-icon name="cross" size="20" />
-        </view>
-      </view>
-      <view class="theme-list">
-        <view
-          wx:for="{{ themes }}"
-          wx:key="id"
-          class="theme-item {{ currentThemeId === item.id ? 'active' : '' }}"
-          bindtap="selectTheme"
-          data-id="{{ item.id }}"
-        >
-          <view class="theme-color" style="background: {{ item.color }};">
-            <van-icon wx:if="{{ currentThemeId === item.id }}" name="success" color="#fff" size="16" />
-          </view>
-          <text class="theme-name">{{ item.name }}</text>
-        </view>
-      </view>
-    </view>
-  </van-popup>
+  <theme-picker
+    show="{{ showThemePopup }}"
+    current-theme-id="{{ currentTheme.id }}"
+    bind:change="onThemeChange"
+    bind:close="closeDialog('theme')"
+  />
 
   <!-- Toast 提示 -->
   <van-toast id="van-toast" />
