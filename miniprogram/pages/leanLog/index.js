@@ -1,17 +1,34 @@
+// miniprogram/pages/leanLog/index.js
 const { THEME_CONFIG, FLOAT_MENU, MANIFESTO } = require('../../constants/index');
-const { getThemeById } = require('../../utils/index');
+const { getThemeById, formatDate } = require('../../utils/index');
+const toastModule = require('../../miniprogram_npm/@vant/weapp/toast/toast');
+const notifyModule = require('../../miniprogram_npm/@vant/weapp/notify/notify');
+const exerciseItem = { id: 1, type: '', typeLabel: '', typeName: '', duration: 30 };
 
 Page({
   data: {
+    // 当前选中的时间戳
+    currentDateTimestamp: null,
     // 主题选择
     showThemePopup: false,
     currentTheme: null,
+    // 记录
+    record: null,
+    // 用户ID（OpenID）
+    userId: null,
+    // 消息
+    Toast: toastModule.default || toastModule,
+    Notify: notifyModule.default || notifyModule,
+    // 有记录的日期列表
+    recordDates: [],
+
+
 
     // 副标题 - 宣言
     headerSubtitle: MANIFESTO,
 
     currentDate: '', // 当前日期
-    currentDateTimestamp: new Date().getTime(),
+    
     minDate: new Date(2020, 0, 1).getTime(),
     maxDate: new Date().getTime(),
     showDatePickerPopup: false,
@@ -22,48 +39,22 @@ Page({
     // 悬浮菜单配置
     floatMenuItems: FLOAT_MENU.ITEMS,
 
-    // 有记录的日期列表
-    recordDates: [],
+    
 
-    // 用户信息
-    userInfo: null,
+    
+    isLoggedIn: false, // 是否已授权登录
 
-    // 基础数据
-    weight: '',
-    bodyFat: '',
-    recordTime: '',
-    bedTimeWeight: '',
 
-    // 饮食记录
-    breakfast: '',
-    lunch: '',
-    dinner: '',
-    snacks: '',
-    water: '',
-    isHealthyDiet: false,
-    diet: '',
 
-    // 运动记录
-    exercised: false,
-    caloriesBurned: '',
-
-    // 三维记录（每周记录）
     showMeasurements: false, // 三维记录卡片是否展开
-    chest: '',    // 胸围
-    waist: '',    // 腰围
-    hip: '',      // 臀围
-    arm: '',      // 上臂围
-    thigh: '',    // 大腿围
-    stepNumber: '',
-    showExerciseTypePopup: false,
-    showExerciseCategoryPopup: false, // 是否显示运动分类弹窗
-    currentExerciseIndex: null, // 当前正在编辑的运动项索引
-    exerciseList: [
-      { id: 1, type: '', typeLabel: '', typeName: '', duration: 30 }
-    ],
+    
 
-    // 状态评估
-    mood: 3,
+    
+
+    
+
+    
+
     hunger: 'normal',
     hungerOptions: [
       { label: '很饿', value: 'very_hungry' },
@@ -72,61 +63,213 @@ Page({
       { label: '较饱', value: 'slightly_full' },
       { label: '很饱', value: 'very_full' }
     ],
-    sleepDuration: 7, // 昨夜睡眠时长（小时）
-    notes: '',
+    showExerciseTypePopup: false,
+    showExerciseCategoryPopup: false, // 是否显示运动分类弹窗
+    currentExerciseIndex: null, // 当前正在编辑的运动项索引
+    
+
+    // 登录弹窗
+    showLoginPopup: false,
   },
 
   onLoad(options) {
-    // 尝试获取本地缓存的用户信息
-    this.loadCachedUserInfo();
-
-    // 加载保存的主题
-    this.loadSavedTheme();
+    // 0. 初始化表单数据
+    this.initRecord();
+    // 1. 初始化日期（先显示页面）
     this.initCurrentDate();
-    
-    // 动态引入 Toast 和 Notify
-    try {
-      const toastModule = require('../../miniprogram_npm/@vant/weapp/toast/toast');
-      this.Toast = toastModule.default || toastModule;
-      const notifyModule = require('../../miniprogram_npm/@vant/weapp/notify/notify');
-      this.Notify = notifyModule.default || notifyModule;
-    } catch (e) {
-      console.warn('Vant 组件加载失败，使用原生 API 替代', e);
-      this.Toast = null;
-      this.Notify = null;
-    }
-    // 检查今天是否已有记录
-    this.checkTodayRecord();
-    // 获取所有有记录的日期
-    this.fetchRecordDates();
+    // 2. 加载保存/默认的主题
+    this.loadSavedTheme();
+    // 3. 尝试获取本地缓存的用户ID
+    this.loadCachedUserId();
+    // 4. 检查登录状态，未登录则弹出登录框
+    this.checkLoginStatus();
   },
-
-  // 加载本地缓存的用户信息
-  loadCachedUserInfo() {
-    const cachedUserInfo = wx.getStorageSync('userInfo');
-    if (cachedUserInfo) {
-      this.setData({ userInfo: cachedUserInfo });
-    }
+  // 初始化表单数据
+  initRecord(){
+    const initRecord = {
+      // 基础数据
+      weight: '',
+      bodyFat: '',
+      // 饮食记录
+      isHealthyDiet: false,
+      water: '',
+      dietrecords: '',
+      // 运动记录
+      stepNumber: '',
+      exercised: false,
+      exerciseList: [exerciseItem],
+      // 睡眠与状态记录
+      sleepDuration: '',
+      mood: 0,
+      hunger: 'normal',
+      // 睡前数据
+      sleepDuration: 7,
+      notes: '',
+      // 三维记录（每周记录）
+      chest: '',    // 胸围
+      waist: '',    // 腰围
+      hip: '',      // 臀围
+      arm: '',      // 上臂围
+      thigh: '',    // 大腿围
+    };
+    this.setData({record: initRecord})
   },
-
-  // 加载保存的主题
+  // 初始化当前日期
+  initCurrentDate() {
+    this.setData({
+      currentDateTimestamp: new Date().getTime()
+    });
+  },
+  // 加载保存/默认的主题
   loadSavedTheme() {
-    let savedId = wx.getStorageSync('themeId');
-    // 空字符串、null、undefined 都使用默认值
-    if (!savedId) {
-      savedId = THEME_CONFIG.DEFAULT_THEME_ID;
-    }
+    let savedId = wx.getStorageSync('themeId') ?? THEME_CONFIG.DEFAULT_THEME_ID;
     const theme = getThemeById(savedId);
     if (theme) {
       this.setData({currentTheme: theme});
-    } else {
-      // 如果找不到对应主题，使用默认主题
-      const defaultTheme = getThemeById(THEME_CONFIG.DEFAULT_THEME_ID);
-      if (defaultTheme) {
-        this.setData({currentTheme: defaultTheme});
-      }
     }
   },
+  // 加载本地缓存的用户ID
+  loadCachedUserId() {
+    const cachedUserId = wx.getStorageSync('userId');
+    if (cachedUserId) {
+      this.setData({ userId: cachedUserId });
+    }
+  },
+  // 检查登录状态
+  checkLoginStatus() {
+    // 如果已有缓存的用户ID，直接使用
+    if (this.data.userId) {
+      this.setData({ isLoggedIn: true });
+      // 获取数据
+      this.fetchRecordDates();
+      this.checkRecordByDate().then(res => this.updateCurrentForm(res));
+      return;
+    }
+
+    // 未登录，弹出登录框
+    this.setData({ showLoginPopup: true });
+  },
+  // 登录成功回调（由 login-auth 组件触发）
+  onLoginSuccess(e) {
+    const userId = e.detail.userId;
+    this.setData({
+      userId: userId,
+      isLoggedIn: true,
+      showLoginPopup: false
+    });
+
+    // 登录成功后，获取数据
+    this.fetchRecordDates();
+    this.checkRecordByDate().then(res => this.updateCurrentForm(res));
+  },
+  // 更新当前表单
+  updateCurrentForm(record) {
+    if (record != null) {
+      this.setData({record: record});
+    } else {
+      this.initRecord();
+    }
+  },
+  // 登录失败回调
+  onLoginFail(e) {
+    console.error('登录失败：', e.detail.error);
+    this.showNotify('登录失败，请重试', 'warning');
+  },
+  // 检查选定日期是否有记录， 并返回结果
+  checkRecordByDate() {
+    const { userId, currentDateTimestamp } = this.data;
+    const date = formatDate(currentDateTimestamp);
+    return wx.cloud.database().collection('lean_logs')
+      .where({ userId, date })
+      .limit(1)
+      .get()
+  },
+  // 更新选定日期记录
+  updateRecord(record) {
+    return wx.cloud.database().collection('lean_logs')
+      .where({ userId, date })
+      .limit(1)
+      .update({ data: record })
+  },
+  // 新增记录
+  addRecord(record, userId, currentDateTimestamp) {
+    return wx.cloud.database().collection('lean_logs')
+      .add({ data: {...record, userId, date: formatDate(currentDateTimestamp)} })
+  },
+  // 提交表单
+  submitForm() {
+    const { userId, record, currentDateTimestamp } = this.data
+    // 检查是否已登录
+    if (!userId) {
+      this.setData({ showLoginPopup: true });
+      return;
+    }
+
+    // 显示加载中
+    wx.showLoading({ title: '保存中...', mask: true });
+
+    // 根据 userId + date 查询是否已有记录
+    const self = this;
+    this.checkRecordByDate().then(res => {
+      if (res?.length > 0) {
+        this.updateRecord(record);
+      } else {
+        this.addRecord(record, userId, currentDateTimestamp);
+      }
+    }).then(() => {
+      self.showNotify('更新成功，继续保持！', 'success');
+      self.fetchRecordDates();
+    }).catch(function(err) {
+      wx.hideLoading();
+      console.error('保存失败：', err);
+      self.showNotify('保存失败，请重试', 'danger');
+    });
+  },
+
+
+  // 获取所有有记录的日期
+  fetchRecordDates() {
+    const {userId, currentDateTimestamp} = this.data;
+    if (userId == null) {
+      return;
+    }
+    const self = this;
+    const db = wx.cloud.database();
+    const date = formatDate(currentDateTimestamp);
+    db.collection('lean_logs')
+      .where({ userId, date })
+      .field({ date: true })
+      .get()
+      .then(function(res) {
+        if (res?.data && res.data?.length > 0) {
+          const dates = res.data.map(function(item) {
+            return item.date;
+          });
+          self.setData({ recordDates: dates });
+        }
+      })
+      .catch(function(err) {
+        console.error('获取记录日期失败：', err);
+      });
+  },
+  
+
+
+
+  
+
+
+  
+
+  // 登录失败回调（由 login-auth 组件触发）
+  onLoginFail(e) {
+    console.error('登录失败：', e.detail.error);
+    this.showNotify('需要授权才能使用完整功能', 'warning');
+  },
+
+  
+
+  
 
   // 主题切换事件（由组件触发）
   onThemeChange(e) {
@@ -140,12 +283,7 @@ Page({
     }
   },
 
-  // 初始化当前日期
-  initCurrentDate() {
-    this.setData({
-      currentDateTimestamp: new Date().getTime()
-    });
-  },
+  
 
   // 打开弹框
   openDialog(type){
@@ -184,54 +322,6 @@ Page({
   // 显示主题选择弹窗
   showThemeSelector() {
     this.setData({ showThemePopup: true });
-  },
-
-  // 获取所有有记录的日期
-  fetchRecordDates() {
-    const self = this;
-    const db = wx.cloud.database();
-
-    db.collection('lean_logs')
-      .field({ date: true })
-      .get()
-      .then(function(res) {
-        if (res.data && res.data.length > 0) {
-          const dates = res.data.map(function(item) {
-            return item.date;
-          });
-          self.setData({ recordDates: dates });
-        }
-      })
-      .catch(function(err) {
-        console.error('获取记录日期失败：', err);
-      });
-  },
-
-  // 获取用户信息（返回 Promise）
-  getUserInfo() {
-    return new Promise((resolve, reject) => {
-      // 如果已有缓存的用户信息，直接返回
-      if (this.data.userInfo) {
-        resolve(this.data.userInfo);
-        return;
-      }
-
-      // 使用 wx.getUserProfile 获取用户信息
-      wx.getUserProfile({
-        desc: '用于保存打卡记录，记录您的减肥历程',
-        success: (res) => {
-          const userInfo = res.userInfo;
-          this.setData({ userInfo });
-          // 缓存用户信息
-          wx.setStorageSync('userInfo', userInfo);
-          resolve(userInfo);
-        },
-        fail: (err) => {
-          console.error('获取用户信息失败：', err);
-          reject(err);
-        }
-      });
-    });
   },
 
   // 显示弱提示 Notify
@@ -311,76 +401,10 @@ Page({
     return `${month}月${day}日`;
   },
 
-  // 检查今天是否已有记录
-  checkTodayRecord() {
-    const self = this;
-    const today = this.formatDateToYMD(new Date());
+  
 
-    wx.cloud.database().collection('lean_logs')
-      .where({
-        date: today
-      })
-      .limit(1)
-      .get()
-      .then(function(res) {
-        if (res.data && res.data.length > 0) {
-          // 今天已有记录，自动加载
-          self.loadRecordData(res.data[0]);
-        }
-      })
-      .catch(function(err) {
-        console.error('检查记录失败：', err);
-      });
-  },
+  
 
-  // 加载记录数据到表单
-  loadRecordData(record) {
-    const exerciseList = record.exercise && record.exercise.items
-      ? record.exercise.items.map(function(item, index) {
-          return {
-            id: Date.now() + index,
-            category: item.category || '',
-            categoryName: item.categoryName || '',
-            type: item.type || '',
-            typeLabel: item.typeLabel || '',
-            duration: item.duration || 30
-          };
-        })
-      : [{ id: 1, type: '', typeLabel: '', duration: 30 }];
-
-    // 如果有三维数据，展开卡片
-    const hasMeasurements = record.measurements && (
-      record.measurements.chest ||
-      record.measurements.waist ||
-      record.measurements.hip ||
-      record.measurements.arm ||
-      record.measurements.thigh
-    );
-
-    this.setData({
-      isEditing: true,
-      editingRecordId: record._id,
-      weight: record.weight ? String(record.weight) : '',
-      bodyFat: record.bodyFat ? String(record.bodyFat) : '',
-      bedTimeWeight: record.bedTimeWeight ? String(record.bedTimeWeight) : '',
-      water: record.diet && record.diet.water ? record.diet.water : '',
-      isHealthyDiet: record.diet && record.diet.isHealthyDiet ? record.diet.isHealthyDiet : false,
-      diet: record.diet && record.diet.notes ? record.diet.notes : '',
-      stepNumber: record.stepNumber ? String(record.stepNumber) : '',
-      exercised: record.exercise ? record.exercise.exercised : false,
-      exerciseList: exerciseList,
-      sleepDuration: record.status && record.status.sleepDuration ? record.status.sleepDuration : 7,
-      mood: record.status && record.status.mood ? record.status.mood : 3,
-      hunger: record.status && record.status.hunger ? record.status.hunger : 'normal',
-      notes: record.notes || '',
-      showMeasurements: hasMeasurements || false,
-      chest: record.measurements && record.measurements.chest ? String(record.measurements.chest) : '',
-      waist: record.measurements && record.measurements.waist ? String(record.measurements.waist) : '',
-      hip: record.measurements && record.measurements.hip ? String(record.measurements.hip) : '',
-      arm: record.measurements && record.measurements.arm ? String(record.measurements.arm) : '',
-      thigh: record.measurements && record.measurements.thigh ? String(record.measurements.thigh) : ''
-    });
-  },
 
   // 显示日期选择器
   showDatePicker() {
@@ -396,14 +420,14 @@ Page({
     const dateYMD = this.formatDateToYMD(date);
     const dateLabel = this.getDateLabel(date);
 
-    // 关闭弹窗
+    // 关闭弹窗，更新标题中的日期信息
     this.setData({
       showDatePickerPopup: false,
       currentDateTimestamp: timestamp,
       selectedDateLabel: dateLabel
     });
 
-    // 查询该日期是否有记录
+    // 重新获取该日期的记录
     wx.showLoading({ title: '加载中...', mask: true });
     wx.cloud.database().collection('lean_logs')
       .where({
@@ -413,7 +437,7 @@ Page({
       .get()
       .then(function(res) {
         wx.hideLoading();
-        if (res.data && res.data.length > 0) {
+        if (res?.data && res.data?.length > 0) {
           // 有记录，加载数据
           self.showNotify('已加载该日期的记录', 'success');
           self.loadRecordData(res.data[0]);
@@ -442,11 +466,12 @@ Page({
   // 数据修改（通用方法）
   onDataChange(e) {
     var field = e.currentTarget.dataset.field;
-    if (field) {
-      var data = {};
-      data[field] = e.detail;
-      this.setData(data);
+    const { record } = this.data;
+    if (record == null) {
+      this.initRecord();
     }
+    record[field] = e.detail;
+    this.setData({record});
   },
 
   // 饮水量调整
@@ -591,16 +616,6 @@ Page({
     this.setData({ exerciseList: newList });
   },
 
-  // 运动类型选择（旧方法，保留兼容）
-  onExerciseTypeChange(e) {
-    // 已废弃
-  },
-
-  // 运动时长（旧方法，保留兼容）
-  onDurationChange(e) {
-    // 已废弃
-  },
-
   // 心情评分
   onMoodChange(e) {
     this.setData({ mood: e.detail });
@@ -631,202 +646,6 @@ Page({
     }
   },
 
-  // 提交表单
-  submitForm() {
-    var self = this;
-    var weight = this.data.weight;
-    var bodyFat = this.data.bodyFat;
-    var recordTime = this.data.recordTime;
-    var breakfast = this.data.breakfast;
-    var lunch = this.data.lunch;
-    var dinner = this.data.dinner;
-    var snacks = this.data.snacks;
-    var water = this.data.water;
-    var exercised = this.data.exercised;
-    var exerciseList = this.data.exerciseList;
-    var caloriesBurned = this.data.caloriesBurned;
-    var mood = this.data.mood;
-    var hunger = this.data.hunger;
-    var sleepDuration = this.data.sleepDuration;
-    var notes = this.data.notes;
-    var bedTimeWeight = this.data.bedTimeWeight;
-    var stepNumber = this.data.stepNumber;
-    var isHealthyDiet = this.data.isHealthyDiet;
-    var diet = this.data.diet;
-    // 三维记录
-    var chest = this.data.chest;
-    var waist = this.data.waist;
-    var hip = this.data.hip;
-    var arm = this.data.arm;
-    var thigh = this.data.thigh;
+  
 
-    // 基础校验
-    if (!weight) {
-      this.showToast('请输入当前体重');
-      return;
-    }
-
-    // 显示加载中
-    wx.showLoading({ title: '保存中...', mask: true });
-
-    // 获取选中日期的 YYYY-MM-DD 格式
-    var selectedDate = new Date(this.data.currentDateTimestamp);
-    var dateYMD = this.formatDateToYMD(selectedDate);
-
-    // 计算总运动时长
-    var totalDuration = 0;
-    if (exercised) {
-      for (var i = 0; i < exerciseList.length; i++) {
-        totalDuration += exerciseList[i].duration;
-      }
-    }
-
-    // 组装运动项
-    var exerciseItems = [];
-    if (exercised) {
-      for (var j = 0; j < exerciseList.length; j++) {
-        exerciseItems.push({
-          category: exerciseList[j].category,
-          categoryName: exerciseList[j].categoryName,
-          type: exerciseList[j].type,
-          typeLabel: exerciseList[j].typeLabel,
-          duration: exerciseList[j].duration
-        });
-      }
-    }
-
-    // 获取用户信息后提交
-    this.getUserInfo()
-      .then(function(userInfo) {
-        // 组装打卡数据
-        var recordData = {
-          date: dateYMD,
-          recordTime: recordTime,
-          weight: parseFloat(weight),
-          bodyFat: bodyFat ? parseFloat(bodyFat) : null,
-          bedTimeWeight: bedTimeWeight ? parseFloat(bedTimeWeight) : null,
-          stepNumber: stepNumber ? parseInt(stepNumber) : null,
-          diet: {
-            breakfast: breakfast,
-            lunch: lunch,
-            dinner: dinner,
-            snacks: snacks,
-            water: water,
-            isHealthyDiet: isHealthyDiet,
-            notes: diet
-          },
-          exercise: {
-            exercised: exercised,
-            items: exerciseItems,
-            totalDuration: totalDuration,
-            calories: caloriesBurned ? parseInt(caloriesBurned) : 0
-          },
-          status: {
-            mood: mood,
-            hunger: hunger,
-            sleepDuration: sleepDuration
-          },
-          // 三维记录（每周记录）
-          measurements: {
-            chest: chest ? parseFloat(chest) : null,
-            waist: waist ? parseFloat(waist) : null,
-            hip: hip ? parseFloat(hip) : null,
-            arm: arm ? parseFloat(arm) : null,
-            thigh: thigh ? parseFloat(thigh) : null
-          },
-          notes: notes,
-          updateTime: new Date().toISOString(),
-          // 用户信息
-          userInfo: {
-            nickName: userInfo.nickName,
-            avatarUrl: userInfo.avatarUrl,
-            gender: userInfo.gender,
-            city: userInfo.city,
-            province: userInfo.province,
-            country: userInfo.country
-          }
-        };
-
-        console.log('打卡数据：', recordData);
-
-        // 判断是更新还是新增
-        if (self.data.isEditing && self.data.editingRecordId) {
-          // 更新已有记录
-          return wx.cloud.database().collection('lean_logs')
-            .doc(self.data.editingRecordId)
-            .update({
-              data: recordData
-            });
-        } else {
-          // 新增记录
-          recordData.createTime = new Date().toISOString();
-          return wx.cloud.database().collection('lean_logs').add({
-            data: recordData
-          });
-        }
-      })
-      .then(function(res) {
-        wx.hideLoading();
-        console.log('保存成功：', res);
-
-        // 如果是新增，保存返回的 ID
-        if (!self.data.isEditing && res._id) {
-          self.setData({
-            isEditing: true,
-            editingRecordId: res._id
-          });
-        }
-
-        // 更新记录日期列表
-        self.fetchRecordDates();
-
-        self.showNotify(self.data.isEditing ? '记录已更新！' : '打卡成功，继续保持！', 'success');
-      })
-      .catch(function(err) {
-        wx.hideLoading();
-        console.error('操作失败：', err);
-        // 用户拒绝授权
-        if (err.errMsg && err.errMsg.includes('getUserProfile:fail auth deny')) {
-          self.showNotify('请授权用户信息以保存记录', 'warning');
-        } else {
-          self.showNotify('保存失败，请检查网络后重试', 'danger');
-        }
-      });
-  },
-
-  // 重置表单
-  resetForm(resetDate = true) {
-    this.setData({
-      weight: '',
-      bodyFat: '',
-      bedTimeWeight: '',
-      breakfast: '',
-      lunch: '',
-      dinner: '',
-      snacks: '',
-      water: '',
-      isHealthyDiet: false,
-      diet: '',
-      exercised: false,
-      stepNumber: '',
-      exerciseList: [
-        { id: 1, type: '', typeLabel: '', duration: 30 }
-      ],
-      caloriesBurned: '',
-      mood: 3,
-      hunger: 'normal',
-      sleepDuration: 7,
-      // 三维记录
-      showMeasurements: false,
-      chest: '',
-      waist: '',
-      hip: '',
-      arm: '',
-      thigh: '',
-      notes: ''
-    });
-    if (resetDate) {
-      this.initCurrentDate();
-    }
-  }
 });

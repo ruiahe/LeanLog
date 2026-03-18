@@ -25,13 +25,19 @@ function getThemeByColor(color) {
 
 /**
  * 格式化日期为 YYYY-MM-DD
- * @param {Date} date - 日期对象
+ * @param {Date|number|string} date - 日期对象、时间戳或日期字符串
  * @returns {string} 格式化后的日期字符串
  */
 function formatDate(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  // 处理时间戳（数字或字符串）
+  let dateObj = date;
+  if (typeof date === 'number' || typeof date === 'string') {
+    dateObj = new Date(date);
+  }
+  
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const day = String(dateObj.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 

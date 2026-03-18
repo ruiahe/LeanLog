@@ -19,7 +19,8 @@
     "calendar": "/components/calendar/index",
     "float-menu": "/components/floatMenu/index",
     "theme-picker": "/components/themePicker/index",
-    "exercise-picker": "/components/exercisePicker/index"
+    "exercise-picker": "/components/exercisePicker/index",
+    "login-auth": "/components/loginAuth/index"
   },
   "navigationBarTitleText": "减肥打卡"
 }

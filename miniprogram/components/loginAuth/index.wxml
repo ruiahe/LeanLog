@@ -1,0 +1,20 @@
+<!-- 登录授权组件 -->
+<van-dialog
+  use-slot
+  title="欢迎使用 LeanLog"
+  show="{{ show }}"
+  show-confirm-button="{{ false }}"
+  close-on-click-overlay="{{ false }}"
+>
+  <view class="login-dialog">
+    <view class="login-avatar">
+      <van-icon name="user-circle-o" size="80" color="{{ themeColor }}" />
+    </view>
+    <view class="login-desc">{{ desc }}</view>
+    <view class="login-buttons">
+      <van-button type="primary" block round bind:click="onLogin" color="{{ themeColor }}">
+        微信一键登录
+      </van-button>
+    </view>
+  </view>
+</van-dialog>

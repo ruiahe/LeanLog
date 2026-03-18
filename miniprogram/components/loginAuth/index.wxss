@@ -1,0 +1,26 @@
+/* 登录授权组件样式 */
+.login-dialog {
+  padding: 40rpx 40rpx 60rpx;
+  text-align: center;
+}
+
+.login-avatar {
+  margin-bottom: 40rpx;
+}
+
+.login-desc {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 50rpx;
+  line-height: 1.6;
+}
+
+.login-buttons {
+  padding: 0 20rpx;
+}
+
+.login-buttons .van-button {
+  height: 88rpx !important;
+  font-size: 30rpx !important;
+  font-weight: 600 !important;
+}
