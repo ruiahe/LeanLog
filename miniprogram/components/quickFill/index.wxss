@@ -1,0 +1,25 @@
+/* 一键填写组件样式 */
+.quick-fill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  padding: 14rpx 0;
+  border-radius: 24rpx;
+  border: 2rpx solid;
+  background: var(--card-bg);
+  font-size: 24rpx;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.quick-fill text {
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.quick-fill:active {
+  background: var(--bg-secondary, #EDF2F7);
+  transform: scale(0.97);
+}

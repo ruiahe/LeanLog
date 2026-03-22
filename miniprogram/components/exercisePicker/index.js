@@ -80,7 +80,6 @@ Component({
     // 选择具体运动类型
     onSelectType(e) {
       const { value, label } = e.currentTarget.dataset;
-      
       // 判断是否是"其他"类型，需要显示输入框
       if (value === 'other_aerobic' || value === 'other_anaerobic') {
         this.setData({
@@ -109,7 +108,7 @@ Component({
 
     // 关闭分类弹窗
     onCloseCategory() {
-      this.triggerEvent('closecategory');
+      this.triggerEvent('closeCategory', 'exercise-category');
     },
 
     // 关闭类型弹窗
@@ -118,7 +117,7 @@ Component({
         showCustomInput: false,
         customExerciseType: ''
       });
-      this.triggerEvent('closetype');
+      this.triggerEvent('closeType', 'exercise-type');
     },
 
     // 自定义运动类型输入

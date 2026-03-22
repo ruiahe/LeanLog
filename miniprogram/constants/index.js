@@ -32,8 +32,18 @@ const FLOAT_MENU = {
   ],
 };
 
+// 饥饿成都分类
+const HUNGER_OPTIONS = [
+  { label: '很饿', value: 'very_hungry' },
+  { label: '有点饿', value: 'slightly_hungry' },
+  { label: '适中', value: 'normal' },
+  { label: '较饱', value: 'slightly_full' },
+  { label: '很饱', value: 'very_full' }
+]
+
 module.exports = {
   MANIFESTO,
   THEME_CONFIG,
-  FLOAT_MENU
+  FLOAT_MENU,
+  HUNGER_OPTIONS
 };

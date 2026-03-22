@@ -7,7 +7,7 @@
     </view>
     <view class="month-title">{{ year }}年{{ month }}月</view>
     <view class="nav-btn" bindtap="nextMonth">
-      <van-icon name="arrow-right" size="18" color="{{ theme.color }}" />
+      <van-icon name="arrow" size="18" color="{{ theme.color }}" />
     </view>
   </view>
 

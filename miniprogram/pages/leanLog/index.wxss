@@ -51,6 +51,19 @@
   display: inline-block;
 }
 
+/* ==================== 快捷操作栏 ==================== */
+.action-bar {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 24rpx;
+}
+
+/* 操作按钮 */
+.action-bar .action-btn {
+  flex: 1;
+}
+
 /* ==================== 表单容器 ==================== */
 .form-container {
   padding: 0 30rpx;
@@ -129,53 +142,6 @@
   padding-left: 8rpx;
 }
 
-/* ==================== 饮水量计数器 ==================== */
-.water-counter {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.water-amount {
-  font-size: 28rpx;
-  color: var(--primary-color);
-  font-weight: 600;
-  margin: 0 20rpx;
-  min-width: 80rpx;
-  text-align: center;
-}
-
-.water-btn {
-  width: 56rpx !important;
-  height: 56rpx !important;
-  padding: 0 !important;
-  border-radius: 50% !important;
-  background: var(--border-color) !important;
-  border: none !important;
-  color: var(--primary-color) !important;
-  font-size: 32rpx !important;
-  font-weight: 600 !important;
-}
-
-/* ==================== 运动时长滑块 ==================== */
-.duration-slider {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  width: 100%;
-}
-
-.duration-slider van-slider {
-  width: 320rpx;
-}
-
-.duration-text {
-  font-size: 24rpx;
-  color: var(--danger-color);
-  font-weight: 500;
-  margin-top: 12rpx;
-}
-
 /* ==================== 饥饿感标签 ==================== */
 .hunger-tags {
   display: flex;
@@ -251,6 +217,7 @@
 .form-card .diet-field .van-cell__value {
   height: auto !important;
   min-height: 80rpx !important;
+  padding-left: 10rpx;
 }
 
 .form-card .diet-field .van-field__body {
@@ -268,6 +235,7 @@
 .form-card .notes-field .van-cell__value {
   height: auto !important;
   min-height: 80rpx !important;
+  padding-left: 10rpx;
 }
 
 .form-card .notes-field .van-field__body {
@@ -288,24 +256,43 @@
   align-items: center !important;
 }
 
-.form-card .van-field__label {
-  color: var(--text-secondary) !important;
-  font-weight: 500;
-  min-width: 140rpx !important;
-}
-
+/* 左侧标题/标签宽度统一 */
+.form-card .van-field__label,
 .form-card .van-cell__title {
   color: var(--text-secondary) !important;
   font-weight: 500;
-  min-width: 140rpx !important;
+  flex: none !important;
+  width: 200rpx !important;
+  min-width: 200rpx !important;
+  max-width: 200rpx !important;
+}
+
+/* 右侧内容区域宽度统一 */
+.form-card .van-cell__value {
+  flex: 1 !important;
 }
 
 /* van-cell 右侧内容区域居中 */
-.form-card .van-cell__value {
+.form-card .van-cell:not(.diet-field):not(.notes-field):not(.hunger-cell) .van-cell__value {
   height: 96rpx !important;
   display: flex !important;
   align-items: center !important;
   justify-content: flex-end !important;
+}
+
+/* textarea 类型的 field 需要覆盖上面的固定高度 */
+.form-card .van-cell.diet-field .van-cell__value,
+.form-card .van-cell.notes-field .van-cell__value {
+  height: auto !important;
+  min-height: 80rpx !important;
+}
+
+.form-card .van-cell.diet-field .van-field__body,
+.form-card .van-cell.notes-field .van-field__body {
+  height: auto !important;
+  align-items: flex-start !important;
+  padding-top: 16rpx !important;
+  width: 100% !important;
 }
 
 /* van-switch 居中 */
@@ -382,19 +369,28 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24rpx;
+  padding: 0 20rpx;
+  height: 96rpx;
+  min-height: 96rpx;
 }
 
 .type-label,
 .duration-label {
   font-size: 28rpx;
   color: var(--text-secondary);
+  font-weight: 500;
+  width: 200rpx;
+  min-width: 200rpx;
+  max-width: 200rpx;
+  flex: none;
 }
 
 .type-value,
 .duration-value {
   display: flex;
   align-items: center;
+  flex: 1;
+  justify-content: space-between;
 }
 
 .type-value text {
@@ -411,10 +407,9 @@
 }
 
 .duration-number {
-  width: 80rpx;
+  width: calc(100% - 60rpx);
   font-size: 28rpx;
   color: var(--text-primary);
-  text-align: right;
 }
 
 .duration-unit {
@@ -437,39 +432,3 @@
 .add-exercise-btn text {
   margin-left: 8rpx;
 }
-
-/* ==================== 睡眠时长调节器 ==================== */
-.sleep-duration-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-}
-
-.sleep-adjust-btn {
-  width: 52rpx;
-  height: 52rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-secondary);
-  border-radius: 50%;
-  border: 2rpx solid var(--border-color);
-}
-
-.sleep-adjust-btn:active {
-  background: var(--border-color);
-}
-
-.sleep-duration-value {
-  min-width: 60rpx;
-  font-size: 32rpx;
-  font-weight: 600;
-  color: var(--primary-color);
-  text-align: center;
-}
-
-.sleep-duration-unit {
-  font-size: 24rpx;
-  color: var(--text-hint);
-}
-

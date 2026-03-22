@@ -46,6 +46,7 @@
         bindtap="onSelectType"
         data-value="{{ item.value }}"
         data-label="{{ item.label }}"
+        style="{{ currentExercise.type === item.value ? 'color: ' + themeColor : ''}}"
       >
         <text>{{ item.label }}</text>
         <van-icon wx:if="{{ currentExercise.type === item.value }}" name="success" color="{{ themeColor }}" />

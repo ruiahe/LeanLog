@@ -200,7 +200,7 @@ Component({
 
     // 取消
     onCancel() {
-      this.triggerEvent('cancel');
+      this.triggerEvent('cancel', 'date-picker');
     },
 
     // 确认

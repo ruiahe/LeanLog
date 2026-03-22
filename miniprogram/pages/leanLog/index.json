@@ -20,7 +20,10 @@
     "float-menu": "/components/floatMenu/index",
     "theme-picker": "/components/themePicker/index",
     "exercise-picker": "/components/exercisePicker/index",
-    "login-auth": "/components/loginAuth/index"
+    "login-auth": "/components/loginAuth/index",
+    "quick-fill": "/components/quickFill/index",
+    "back-to-today": "/components/backToToday/index",
+    "streak-badge": "/components/streakBadge/index"
   },
   "navigationBarTitleText": "减肥打卡"
 }

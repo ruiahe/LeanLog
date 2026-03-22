@@ -8,7 +8,7 @@
     catchtouchmove="onTouchMove"
     catchtouchend="onTouchEnd"
   >
-    <van-icon name="plus" size="24" color="#fff" />
+    <van-icon name="{{ showMenu ? 'cross' : 'apps-o' }}" size="{{ showMenu ? 24 : 22 }}" color="#fff" />
   </view>
 
   <!-- 子菜单（动态扇形展开） -->

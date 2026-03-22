@@ -54,27 +54,11 @@ var getDateLabel = function(timestamp) {
 /**
  * 根据时间戳获取标题
  * @param {number} timestamp 时间戳
- * @param {boolean} isEditing 是否编辑模式
  * @returns {string} 标题
  */
-var getTitle = function(timestamp, isEditing) {
+var getTitle = function(timestamp) {
   var dateLabel = getDateLabel(timestamp);
-  var title = '';
-  
-  if (dateLabel === '今天') {
-    if (isEditing) {
-      title = '编辑今日打卡';
-    } else {
-      title = '今日打卡';
-    }
-  } else {
-    if (isEditing) {
-      title = '编辑' + dateLabel + '记录';
-    } else {
-      title = dateLabel + '打卡';
-    }
-  }
-  
+  var title = dateLabel === '今天' ? '今日打卡' : dateLabel + '打卡';
   return title;
 };
 

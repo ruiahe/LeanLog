@@ -1,0 +1,6 @@
+<!-- 连续打卡天数徽章组件 -->
+<view class="streak-badge" wx:if="{{ streakDays > 0 }}" style="background: {{ themeColor }}22;">
+  <van-icon name="fire" size="14" color="{{ themeColor }}" />
+  <text class="streak-count" style="color: {{ themeColor }};">{{ streakDays }}</text>
+  <text class="streak-label" style="color: {{ themeColor }};">天连续</text>
+</view>

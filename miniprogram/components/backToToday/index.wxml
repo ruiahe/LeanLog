@@ -1,0 +1,5 @@
+<!-- 回到今天组件 -->
+<view class="back-to-today" wx:if="{{ visible !== false }}" bindtap="onTap" style="color: {{ themeColor }}; border-color: {{ themeColor }};">
+  <van-icon name="revoke" size="13" color="{{ themeColor }}" />
+  <text>回到今天</text>
+</view>

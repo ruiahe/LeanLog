@@ -15,13 +15,35 @@
   <view class="header">
     <view class="header-bg" style="background: linear-gradient(135deg, {{ currentTheme.color }} 0%, {{ currentTheme.lightColor }} 100%);"></view>
     <view class="header-content">
-      <view class="header-title">{{ filters.getTitle(currentDateTimestamp, isEditing) }}</view>
+      <view class="header-title">{{ filters.getTitle(currentDateTimestamp) }}</view>
       <view class="header-tip">{{ headerSubtitle }}</view>
     </view>
   </view>
 
   <!-- 表单主体 -->
   <view class="form-container">
+    <!-- 快捷操作栏 -->
+    <view class="action-bar">
+      <streak-badge
+        streak-days="{{ streakDays }}"
+        theme-color="{{ currentTheme.color }}"
+      />
+      <back-to-today
+        class="action-btn"
+        wx:if="{{ !isToday }}"
+        theme-color="{{ currentTheme.color }}"
+        bind:backtotoday="goToToday"
+      />
+      <quick-fill
+        class="action-btn"
+        user-id="{{ userId }}"
+        current-date-timestamp="{{ currentDateTimestamp }}"
+        theme-color="{{ currentTheme.color }}"
+        bind:fill="onQuickFill"
+        bind:shownotify="onQuickFillNotify"
+      />
+    </view>
+
     <!-- 基础数据卡片 -->
     <view class="form-card">
       <view class="card-header">
@@ -84,6 +106,7 @@
           border="{{ false }}"
           data-field="diet"
           bind:change="onDataChange"
+          custom-class="diet-field"
         />
       </van-cell-group>
     </view>
@@ -107,7 +130,7 @@
           <view slot="right-icon" class="unit">步</view>
         </van-field>
         <van-cell title="是否运动" border="{{ false }}">
-          <van-switch  data-field="exercised" checked="{{ record.exercised }}" bind:change="onDataChange" active-color="{{ currentTheme.color }}" size="24"/>
+          <van-switch  data-field="exercised" checked="{{ record.exercised }}" bind:change="onExercisedChange" active-color="{{ currentTheme.color }}" size="24"/>
         </van-cell>
 
         <!-- 有氧运动列表 -->
@@ -115,7 +138,7 @@
           <view wx:for="{{ record.exerciseList }}" wx:key="id" class="exercise-item">
             <view class="exercise-header">
               <text class="exercise-label" style="color: {{ currentTheme.color }}">运动 {{ index + 1 }}</text>
-              <view wx:if="{{ exerciseList.length > 1 }}" class="exercise-remove" bindtap="removeExercise" data-index="{{ index }}">
+              <view wx:if="{{ index > 0 }}" class="exercise-remove" bindtap="removeExercise" data-index="{{ index }}">
                 <van-icon name="delete-o" size="16" color="{{ currentTheme.color }}" />
               </view>
             </view>
@@ -136,7 +159,7 @@
                     class="duration-number"
                     type="number"
                     value="{{ item.duration }}"
-                    placeholder="0"
+                    placeholder="请输入运动时长"
                     bindinput="onExerciseDurationInput"
                     data-index="{{ index }}"
                   />
@@ -176,13 +199,13 @@
         </van-field>
         <!-- 今日状态 -->
         <van-cell title="今日状态" border="{{ false }}">
-          <van-rate value="{{ record.mood }}" bind:change="onMoodChange" size="24" color="#F5A623" void-color="#E8E8E8" gutter="2"/>
+          <van-rate data-field="mood" value="{{ record.mood }}" bind:change="onDataChange" size="24" color="#F5A623" void-color="#E8E8E8" gutter="2"/>
         </van-cell>
-        <!-- 饥饿感 -->
-        <van-cell title="饥饿感" border="{{ false }}" is-link="{{ false }}" clickable="{{ false }}" custom-class="hunger-cell">
+        <!-- 睡前饥饿感 -->
+        <van-cell title="睡前饥饿感" border="{{ false }}" is-link="{{ false }}" clickable="{{ false }}" custom-class="hunger-cell">
           <view class="hunger-tags">
             <van-tag
-              wx:for="{{ record.hungerOptions }}"
+              wx:for="{{ hungerOptions }}"
               wx:key="index"
               size="medium"
               type="default"
@@ -312,11 +335,9 @@
     <calendar
       selected-date="{{ currentDateTimestamp }}"
       record-dates="{{ recordDates }}"
-      min-date="{{ minDate }}"
-      max-date="{{ maxDate }}"
       theme="{{ currentTheme }}"
       bind:confirm="onDateConfirm"
-      bind:cancel="onDateCancel"
+      bind:cancel="closeDialog"
     />
   </van-popup>
 
@@ -324,13 +345,13 @@
   <exercise-picker
     show-category="{{ showExerciseCategoryPopup }}"
     show-type="{{ showExerciseTypePopup }}"
-    current-exercise="{{ currentExerciseIndex !== null ? exerciseList[currentExerciseIndex] : null }}"
+    current-exercise="{{ record.currentExerciseIndex !== null ? record.exerciseList[record.currentExerciseIndex] : null }}"
     theme-color="{{ currentTheme.color }}"
     bind:selectcategory="onSelectCategory"
     bind:selecttype="onSelectType"
     bind:backtocategory="backToCategory"
-    bind:closecategory="hideExerciseCategoryPopup"
-    bind:closetype="hideExerciseTypePicker"
+    bind:closeCategory="closeDialog"
+    bind:closeType="closeDialog"
   />
 
   <!-- 主题选择弹窗 -->
@@ -338,7 +359,7 @@
     show="{{ showThemePopup }}"
     current-theme-id="{{ currentTheme.id }}"
     bind:change="onThemeChange"
-    bind:close="closeDialog('theme')"
+    bind:close="closeDialog"
   />
 
   <!-- Toast 提示 -->

@@ -1,0 +1,5 @@
+<!-- 一键填写组件 -->
+<view class="quick-fill" bindtap="onTap" style="color: {{ themeColor }}; border-color: {{ themeColor }};">
+  <van-icon name="edit" size="13" color="{{ themeColor }}" />
+  <text>一键填写</text>
+</view>

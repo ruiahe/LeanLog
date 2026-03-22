@@ -36,7 +36,7 @@ Component({
 
     // 关闭弹窗
     onClose() {
-      this.triggerEvent('close');
+      this.triggerEvent('close', 'theme');
     }
   }
 });

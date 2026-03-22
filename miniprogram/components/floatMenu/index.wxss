@@ -10,7 +10,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 8rpx 24rpx rgba(232, 180, 184, 0.5);
-  z-index: 100;
+  z-index: 50;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -20,7 +20,7 @@
 }
 
 .floating-btn.active {
-  transform: rotate(45deg);
+  transform: scale(1.1);
 }
 
 /* 遮罩层 */
@@ -30,14 +30,14 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 90;
+  z-index: 45;
   background: rgba(0, 0, 0, 0.3);
 }
 
 /* 工具菜单（动态扇形展开） */
 .tool-menu {
   position: fixed;
-  z-index: 95;
+  z-index: 48;
   pointer-events: none;
 }
 
