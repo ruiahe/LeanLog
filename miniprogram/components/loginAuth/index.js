@@ -33,20 +33,28 @@ Component({
           data: { type: 'login' }
         });
         wx.hideLoading();
-        const userId = cloudRes.result.userId;
-        if (!userId) {
-          throw new Error(cloudRes.result.error || '获取用户ID失败');
+
+        const result = cloudRes.result;
+        if (!result || !result.userId) {
+          // 云函数返回了错误（如集合不存在）
+          throw new Error(result?.error || '登录返回数据异常');
         }
 
         // 缓存用户ID
-        wx.setStorageSync('userId', userId);
+        wx.setStorageSync('userId', result.userId);
 
         // 触发登录成功事件
-        self.triggerEvent('loginsuccess', { userId: userId });
+        self.triggerEvent('loginsuccess', { userId: result.userId });
 
       } catch (err) {
         wx.hideLoading();
-        console.error('登录失败：', err);
+        console.error('[登录失败]', err);
+        // 弹出具体错误信息，方便排查
+        wx.showToast({
+          title: err.message || '登录失败',
+          icon: 'none',
+          duration: 3000
+        });
         self.triggerEvent('loginfail', { error: err });
       }
     }
