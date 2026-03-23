@@ -1,6 +1,7 @@
 /**
  * 登录授权组件
- * 先确认授权，再根据 openid 在 users 集合中获取/创建用户记录
+ * 点击按钮直接通过云函数获取 openid 完成登录
+ * 注：wx.getUserInfo 已废弃，改用静默登录方式
  */
 Component({
   properties: {
@@ -17,26 +18,22 @@ Component({
     // 描述文字
     desc: {
       type: String,
-      value: '请授权登录，以保存您的打卡记录'
+      value: '登录后即可保存您的打卡记录'
     }
   },
 
   methods: {
-    // 点击登录按钮（open-type="getUserInfo" 触发）
-    async onLogin(e) {
+    // 点击登录按钮
+    async onLogin() {
       const self = this;
-      // 2. 授权成功后，调用云函数用 openid 查询/创建用户
       try {
         wx.showLoading({ title: '登录中...', mask: true });
-
         const cloudRes = await wx.cloud.callFunction({
           name: 'quickstartFunctions',
           data: { type: 'login' }
         });
-
         wx.hideLoading();
         const userId = cloudRes.result.userId;
-
         if (!userId) {
           throw new Error(cloudRes.result.error || '获取用户ID失败');
         }

@@ -12,7 +12,7 @@
     </view>
     <view class="login-desc">{{ desc }}</view>
     <view class="login-buttons">
-      <button class="login-btn" style="background-color: {{ themeColor }};" open-type="getUserInfo" bindgetuserinfo="onLogin">
+      <button class="login-btn" style="background-color: {{ themeColor }};" bindtap="onLogin">
         微信一键登录
       </button>
     </view>
