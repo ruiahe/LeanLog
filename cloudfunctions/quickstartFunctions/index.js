@@ -4,15 +4,36 @@ cloud.init({
 });
 
 const db = cloud.database();
-// 获取openid
-const getOpenId = async () => {
-  // 获取基础信息
+
+// 用户登录：创建或更新用户记录，返回 users._id 作为 userId
+const login = async () => {
   const wxContext = cloud.getWXContext();
-  return {
-    openid: wxContext.OPENID,
-    appid: wxContext.APPID,
-    unionid: wxContext.UNIONID,
-  };
+  const openid = wxContext.OPENID;
+  try {
+    // 根据 _openid 查找用户
+    const userRes = await db.collection('users').where({ _openid: openid }).limit(1).get();
+    if (userRes.data && userRes.data.length > 0) {
+      // 已有用户，更新登录时间
+      const existingUser = userRes.data[0];
+      await db.collection('users').doc(existingUser._id).update({
+        data: { loginTime: db.serverDate() }
+      });
+      return { userId: existingUser._id, isNewUser: false };
+    } else {
+      // 新用户，创建记录
+      const addRes = await db.collection('users').add({
+        data: {
+          _openid: openid,
+          username: '',
+          avatarUrl: '',
+          loginTime: db.serverDate()
+        }
+      });
+      return { userId: addRes._id, isNewUser: true };
+    }
+  } catch (err) {
+    return { userId: null, isNewUser: false, error: err.message || err };
+  }
 };
 
 // 获取小程序二维码
@@ -157,18 +178,11 @@ const deleteRecord = async (event) => {
   }
 };
 
-// const getOpenId = require('./getOpenId/index');
-// const getMiniProgramCode = require('./getMiniProgramCode/index');
-// const createCollection = require('./createCollection/index');
-// const selectRecord = require('./selectRecord/index');
-// const updateRecord = require('./updateRecord/index');
-// const fetchGoodsList = require('./fetchGoodsList/index');
-// const genMpQrcode = require('./genMpQrcode/index');
 // 云函数入口函数
 exports.main = async (event, context) => {
   switch (event.type) {
-    case "getOpenId":
-      return await getOpenId();
+    case "login":
+      return await login(event);
     case "getMiniProgramCode":
       return await getMiniProgramCode();
     case "createCollection":

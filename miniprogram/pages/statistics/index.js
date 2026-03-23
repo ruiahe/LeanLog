@@ -72,6 +72,12 @@ Page({
   // 加载统计数据
   loadStatistics() {
     const self = this;
+    const userId = wx.getStorageSync('userId');
+    if (!userId) {
+      this.setData({ loading: false });
+      return;
+    }
+
     const db = wx.cloud.database();
     let query = db.collection('lean_logs');
 
@@ -82,8 +88,11 @@ Page({
       startDate.setDate(startDate.getDate() - days);
       const startDateStr = this.formatDate(startDate);
       query = query.where({
+        userId: userId,
         date: db.command.gte(startDateStr)
       });
+    } else {
+      query = query.where({ userId: userId });
     }
 
     query

@@ -10,7 +10,7 @@ Page({
     currentTheme: null, // 当前主题item
     record: null, // 记录
     currentRecordId: null, // 当前记录的 _id（用于判断是更新还是新增）
-    userId: null, // 用户ID（OpenID）
+    userId: null, // 用户ID
     // 消息
     Toast: toastModule.default || toastModule,
     Notify: notifyModule.default || notifyModule,
@@ -180,7 +180,7 @@ Page({
   goToToday() {
     this.switchDateWithCheck(new Date().getTime());
   },
-  
+
   // 一键填写提示回调（由 quick-fill 组件触发）
   onQuickFillNotify(e) {
     const { message, type } = e.detail;
@@ -188,7 +188,8 @@ Page({
   },
   // 加载保存/默认的主题
   loadSavedTheme() {
-    let savedId = wx.getStorageSync('themeId') ?? THEME_CONFIG.DEFAULT_THEME_ID;
+    let savedId = wx.getStorageSync('themeId');
+    savedId = savedId == null || savedId === '' ? THEME_CONFIG.DEFAULT_THEME_ID : savedId;
     const theme = getThemeById(savedId);
     if (theme) {
       this.setData({currentTheme: theme});

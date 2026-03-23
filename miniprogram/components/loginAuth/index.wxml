@@ -12,9 +12,9 @@
     </view>
     <view class="login-desc">{{ desc }}</view>
     <view class="login-buttons">
-      <van-button type="primary" block round bind:click="onLogin" color="{{ themeColor }}">
+      <button class="login-btn" style="background-color: {{ themeColor }};" open-type="getUserInfo" bindgetuserinfo="onLogin">
         微信一键登录
-      </van-button>
+      </button>
     </view>
   </view>
 </van-dialog>
