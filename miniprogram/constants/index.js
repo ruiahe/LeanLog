@@ -33,9 +33,25 @@ const FLOAT_MENU = {
 };
 
 // 打卡属性列表
-const PROPERTIES = ['weight', 'bodyFat', 'isHealthyDiet', 'water', 'diet',
-'stepNumber', 'exercised', 'exerciseList', 'sleepDuration', 'mood', 'hunger',
-'bedTimeWeight', 'notes', 'chest', 'waist', 'hip', 'arm', 'thigh'];
+const PROPERTIE_ITEMS = [
+  {label: '空腹体重', value: 'weight', canShowLineChart: true}, 
+  {label: '体脂率', value: 'bodyFat', canShowLineChart: true}, 
+  {label: '是否按计划饮食', value: 'isHealthyDiet'}, 
+  {label: '饮水量', value: 'water', canShowLineChart: true}, 
+  {label: '饮食记录', value: 'diet'}, 
+  {label: '行走步数', value: 'stepNumber', canShowLineChart: true}, 
+  {label: '是否运动', value: 'exercised'}, 
+  {label: '运动列表', value: 'exerciseList'}, 
+  {label: '昨夜睡眠', value: 'sleepDuration', canShowLineChart: true}, 
+  {label: '状态', value: 'mood'}, 
+  {label: '饥饿感', value: 'hunger'}, 
+  {label: '睡前体重', value: 'bedTimeWeight', canShowLineChart: true}, 
+  {label: '备注', value: 'notes'}, 
+  {label: '胸围', value: 'chest', canShowLineChart: true}, 
+  {label: '腰围', value: 'waist', canShowLineChart: true}, 
+  {label: '臀围', value: 'hip', canShowLineChart: true}, 
+  {label: '上臂围', value: 'arm', canShowLineChart: true}, 
+  {label: '大腿围', value: 'thigh', canShowLineChart: true}];
 
 // 饥饿程度分类
 const HUNGER_OPTIONS = [
@@ -85,7 +101,7 @@ module.exports = {
   MANIFESTO,
   THEME_CONFIG,
   FLOAT_MENU,
-  PROPERTIES,
+  PROPERTIE_ITEMS,
   HUNGER_OPTIONS,
   EXERCISE_TYPES_BY_CATEGORY,
   EXERCISE_CATEGORIES

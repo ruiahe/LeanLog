@@ -2,12 +2,12 @@
   "navigationBarTitleText": "数据统计",
   "usingComponents": {
     "van-icon": "@vant/weapp/icon/index",
-    "van-cell": "@vant/weapp/cell/index",
-    "van-cell-group": "@vant/weapp/cell-group/index",
     "van-loading": "@vant/weapp/loading/index",
     "van-empty": "@vant/weapp/empty/index",
-    "van-tabs": "@vant/weapp/tabs/index",
-    "van-tab": "@vant/weapp/tab/index",
-    "van-notify": "@vant/weapp/notify/index"
+    "van-notify": "@vant/weapp/notify/index",
+    "van-picker": "@vant/weapp/picker/index",
+    "van-popup": "@vant/weapp/popup/index",
+    "float-menu": "/components/floatMenu/index",
+    "theme-picker": "/components/themePicker/index"
   }
 }

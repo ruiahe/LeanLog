@@ -47,7 +47,7 @@
     <!-- 基础数据卡片 -->
     <view class="form-card">
       <view class="card-header">
-        <van-icon name="chart-trending-o" size="18" color="{{ currentTheme.color }}" />
+        <view class="card-icon card-icon-weight"><van-icon name="balance-list-o" size="20" color="#fff" /></view>
         <text class="card-title">基础数据</text>
       </view>
       <van-cell-group inset>
@@ -79,7 +79,7 @@
     <!-- 饮食记录卡片 -->
     <view class="form-card">
       <view class="card-header">
-        <van-icon name="balance-list-o" size="18" color="#F5A623" />
+        <view class="card-icon card-icon-diet"><van-icon name="fire-o" size="20" color="#fff" /></view>
         <text class="card-title">饮食记录</text>
       </view>
       <van-cell-group inset>
@@ -114,7 +114,7 @@
     <!-- 运动记录卡片 -->
     <view class="form-card">
       <view class="card-header">
-        <van-icon name="fire-o" size="18" color="#FF6B6B" />
+        <view class="card-icon card-icon-exercise"><van-icon name="like-o" size="20" color="#fff" /></view>
         <text class="card-title">运动记录</text>
       </view>
       <van-cell-group inset>
@@ -181,7 +181,7 @@
     <!-- 睡眠与状态卡片 -->
     <view class="form-card">
       <view class="card-header">
-        <van-icon name="closed-eye" size="18" color="#8B5CF6" />
+        <view class="card-icon card-icon-sleep"><van-icon name="closed-eye" size="20" color="#fff" /></view>
         <text class="card-title">睡眠与状态</text>
       </view>
       <van-cell-group inset>
@@ -224,7 +224,7 @@
     <!-- 睡前数据卡片 -->
     <view class="form-card">
       <view class="card-header">
-        <van-icon name="balance-list-o" size="18" color="#5B8FF9" />
+        <view class="card-icon card-icon-night"><van-icon name="star-o" size="20" color="#fff" /></view>
         <text class="card-title">睡前数据</text>
       </view>
       <van-cell-group inset>
@@ -256,7 +256,7 @@
     <!-- 三维记录卡片（每周记录） -->
     <view class="form-card {{ showMeasurements ? '' : 'collapsed' }}">
       <view class="card-header card-header-clickable" bindtap="toggleMeasurementsCard">
-        <van-icon name="scan" size="18" color="#13C2C2" />
+        <view class="card-icon card-icon-body"><van-icon name="scan" size="20" color="#fff" /></view>
         <text class="card-title">三维记录</text>
         <text class="card-subtitle">每周记录一次</text>
         <van-icon name="{{ showMeasurements ? 'arrow-up' : 'arrow-down' }}" size="16" color="#999" class="card-arrow" />

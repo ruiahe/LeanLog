@@ -22,11 +22,18 @@
     "miniprogram": {
       "list": [
         {
-          "name": "首页",
-          "pathName": "pages/leanLog/index",
+          "name": "统计页",
+          "pathName": "pages/statistics/index",
           "query": "",
           "scene": null,
           "launchMode": "default"
+        },
+        {
+          "name": "首页",
+          "pathName": "pages/leanLog/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
         }
       ]
     }

@@ -1,5 +1,5 @@
 // miniprogram/pages/leanLog/index.js
-const { THEME_CONFIG, FLOAT_MENU, MANIFESTO, HUNGER_OPTIONS, PROPERTIES } = require('../../constants/index');
+const { THEME_CONFIG, FLOAT_MENU, MANIFESTO, HUNGER_OPTIONS, PROPERTIE_ITEMS } = require('../../constants/index');
 const { getThemeById, formatDate } = require('../../utils/index');
 const toastModule = require('../../miniprogram_npm/@vant/weapp/toast/toast');
 const notifyModule = require('../../miniprogram_npm/@vant/weapp/notify/notify');
@@ -89,7 +89,7 @@ Page({
   // 保存记录快照（记录加载或保存后调用）
   saveSnapshot(record) {
     // 深拷贝，过滤掉系统字段
-    var fieldsToKeep = PROPERTIES;
+    var fieldsToKeep = PROPERTIE_ITEMS.map(i => i.value);
     var snapshot = {};
     fieldsToKeep.forEach(function(key) {
       if (record[key] !== undefined) {
@@ -103,7 +103,7 @@ Page({
     var snapshot = this._savedSnapshot;
     if (!snapshot) return false;
     var record = this.data.record;
-    var fieldsToCheck = PROPERTIES;
+    var fieldsToCheck = PROPERTIE_ITEMS.map(i => i.value);
     for (var i = 0; i < fieldsToCheck.length; i++) {
       var key = fieldsToCheck[i];
       var current = JSON.stringify(record[key] != null ? record[key] : '');

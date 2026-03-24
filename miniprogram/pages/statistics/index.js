@@ -1,195 +1,361 @@
-const { THEME_CONFIG } = require('../../constants/index');
+const { THEME_CONFIG, FLOAT_MENU } = require('../../constants/index');
+const { getThemeById } = require('../../utils/index');
+const wxCharts = require('../../utils/wxcharts-min');
 
-// 图表配置
-const CHART_CONFIG = {
-  padding: 30,
-  pointRadius: 4,
-  lineWidth: 2,
-  gridColor: '#E8E8E8',
-  lineColor: THEME_CONFIG.DEFAULT_COLOR,
-  pointColor: THEME_CONFIG.DEFAULT_COLOR,
-  textColor: '#999999',
-  fontSize: 10
+// 趋势指标配置
+const METRIC_CONFIG = {
+  weight:        { label: '体重', unit: 'kg', key: 'weight', color: '#E8B4B8', decimals: 1 },
+  bodyFat:       { label: '体脂率', unit: '%', key: 'bodyFat', color: '#5B8FF9', decimals: 1 },
+  water:         { label: '饮水量', unit: 'ml', key: 'water', color: '#13C2C2', decimals: 0 },
+  stepNumber:    { label: '步数', unit: '步', key: 'stepNumber', color: '#FF976A', decimals: 0 },
+  sleepDuration: { label: '睡眠', unit: 'h', key: 'sleepDuration', color: '#8B5CF6', decimals: 1 }
+};
+
+// 时间范围配置
+const TIME_RANGE_CONFIG = {
+  '7d':  { label: '近7天', days: 7 },
+  '30d': { label: '近30天', days: 30 },
+  '90d': { label: '近90天', days: 90 },
+  'all': { label: '全部', days: 0 }
+};
+
+// 粒度配置
+const GRANULARITY_CONFIG = {
+  daily:   '按天',
+  monthly: '按月',
+  yearly:  '按年'
 };
 
 Page({
   data: {
-    primaryColor: THEME_CONFIG.DEFAULT_COLOR,
-    primaryColorLight: THEME_CONFIG.DEFAULT_LIGHT_COLOR,
+    primaryColor: '#E8B4B8',
+    primaryColorLight: '#F2D5D8',
     loading: true,
-    timeRange: 'week', // week, month, all
-    records: [],
-    recentRecords: [],
-    chartData: [],
+    currentTheme: null,
+    floatMenuItems: FLOAT_MENU.ITEMS,
+    showThemePopup: false,
 
-    // 统计数据
-    latestWeight: null,
-    latestBodyFat: null,
+    // 今日数据
+    todayWeight: null,
+    todayBodyFat: null,
     weightChange: 0,
-    fatChange: 0,
     weightChangeText: '无变化',
+    fatChange: 0,
     fatChangeText: '无变化',
+
+    // 打卡统计
     totalDays: 0,
     exerciseDays: 0,
     totalExerciseMinutes: 0,
-    avgWater: 0
+    avgWater: 0,
+
+    // 趋势图选择器
+    metricKeys: Object.keys(METRIC_CONFIG),
+    metricNames: Object.keys(METRIC_CONFIG).map(function(k) { return METRIC_CONFIG[k].label; }),
+    metricIndex: 0,
+
+    timeRangeKeys: Object.keys(TIME_RANGE_CONFIG),
+    timeRangeNames: Object.keys(TIME_RANGE_CONFIG).map(function(k) { return TIME_RANGE_CONFIG[k].label; }),
+    timeRangeIndex: 0,
+
+    granularityKeys: Object.keys(GRANULARITY_CONFIG),
+    granularityNames: Object.keys(GRANULARITY_CONFIG).map(function(k) { return GRANULARITY_CONFIG[k]; }),
+    granularityIndex: 0,
+
+    hasRecords: false,
+    floatMenuItems: FLOAT_MENU.ITEMS.map(function(item) {
+      return item.id === 'chart'
+        ? { id: 'chart', icon: 'edit', label: '打卡记录' }
+        : item;
+    }),
   },
+
+  // 保存 wxCharts 实例
+  _chart: null,
+  // 缓存全部记录
+  _allRecords: [],
 
   onLoad() {
     this.loadSavedTheme();
-    this.loadStatistics();
+    this.loadAllData();
   },
 
   onShow() {
-    // 每次显示页面时刷新数据
     this.loadSavedTheme();
-    this.loadStatistics();
-  },
-
-  // 加载保存的主题
-  loadSavedTheme() {
-    const savedId = wx.getStorageSync('themeId');
-    if (savedId) {
-      const theme = THEME_CONFIG.getThemeById(savedId);
-      if (theme) {
-        this.setData({
-          primaryColor: theme.color,
-          primaryColorLight: theme.lightColor
-        });
-      }
+    // 非首次加载且有缓存数据时，重绘图表
+    if (this._allRecords.length > 0 && !this.data.loading) {
+      this.updateChartFromCache();
     }
   },
 
-  // 切换时间范围
-  changeTimeRange(e) {
-    const range = e.currentTarget.dataset.range;
-    if (range === this.data.timeRange) return;
-
-    this.setData({ timeRange: range, loading: true });
-    this.loadStatistics();
+  // 加载主题
+  loadSavedTheme() {
+    let savedId = wx.getStorageSync('themeId');
+    savedId = savedId == null || savedId === '' ? THEME_CONFIG.DEFAULT_THEME_ID : savedId;
+    const theme = getThemeById(savedId);
+    if (theme) {
+      this.setData({
+        currentTheme: theme,
+        primaryColor: theme.color,
+        primaryColorLight: theme.lightColor
+      });
+    }
   },
 
-  // 加载统计数据
-  loadStatistics() {
-    const self = this;
+  // 加载所有数据
+  loadAllData() {
     const userId = wx.getStorageSync('userId');
     if (!userId) {
-      this.setData({ loading: false });
+      this.setData({ loading: false, hasRecords: false });
       return;
     }
 
-    // 根据时间范围计算开始日期
-    let startDate = '';
-    if (this.data.timeRange !== 'all') {
-      const days = this.data.timeRange === 'week' ? 7 : 30;
-      const startDateObj = new Date();
-      startDateObj.setDate(startDateObj.getDate() - days);
-      startDate = this.formatDate(startDateObj);
-    }
+    const self = this;
+    this.setData({ loading: true });
 
-    wx.cloud.callFunction({
-      name: 'quickstartFunctions',
-      data: { type: 'getLogList', userId, startDate }
-    }).then(function(res) {
-      const records = res.result?.data || [];
-      self.processData(records);
+    const todayStr = this.formatDate(new Date());
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = this.formatDate(yesterday);
+
+    Promise.all([
+      this.callGet('getRecordByDate', { userId, date: todayStr }),
+      this.callGet('getRecordByDate', { userId, date: yesterdayStr }),
+      this.callGet('getLogList', { userId, startDate: '' })
+    ]).then(function(results) {
+      const todayRes = results[0].data || [];
+      const yesterdayRes = results[1].data || [];
+      const allRecords = results[2].data || [];
+
+      self._allRecords = allRecords;
+      self.processTodayData(todayRes, yesterdayRes);
+      self.processStats(allRecords);
+      self.setData({ loading: false, hasRecords: allRecords.length > 0 });
+
+      // 等 canvas 节点渲染完后再画图
+      if (allRecords.length > 0) {
+        setTimeout(function() {
+          self.updateChartFromCache();
+        }, 300);
+      }
     }).catch(function(err) {
-      console.error('加载统计数据失败：', err);
+      console.error('加载数据失败：', err);
       self.setData({ loading: false });
       self.showNotify('加载失败，请重试', 'danger');
     });
   },
 
-  // 处理数据
-  processData(records) {
+  // 封装云函数调用
+  callGet(type, data) {
+    return wx.cloud.callFunction({
+      name: 'quickstartFunctions',
+      data: { type: type, ...data }
+    }).then(function(res) { return res.result; });
+  },
+
+  // 处理今日数据
+  processTodayData(todayRes, yesterdayRes) {
+    const todayRecord = todayRes.length > 0 ? todayRes[0] : null;
+    const yesterdayRecord = yesterdayRes.length > 0 ? yesterdayRes[0] : null;
+
+    const todayWeight = todayRecord ? todayRecord.weight : null;
+    const todayBodyFat = todayRecord ? todayRecord.bodyFat : null;
+    const yesterdayWeight = yesterdayRecord ? yesterdayRecord.weight : null;
+    const yesterdayBodyFat = yesterdayRecord ? yesterdayRecord.bodyFat : null;
+
+    let weightChange = 0;
+    let fatChange = 0;
+
+    if (todayWeight != null && yesterdayWeight != null) {
+      weightChange = todayWeight - yesterdayWeight;
+    }
+    if (todayBodyFat != null && yesterdayBodyFat != null) {
+      fatChange = todayBodyFat - yesterdayBodyFat;
+    }
+
+    this.setData({
+      todayWeight: todayWeight,
+      todayBodyFat: todayBodyFat,
+      weightChange: weightChange,
+      weightChangeText: this.formatChange(weightChange),
+      fatChange: fatChange,
+      fatChangeText: this.formatChange(fatChange)
+    });
+  },
+
+  // 处理打卡统计
+  processStats(records) {
     if (records.length === 0) {
       this.setData({
-        loading: false,
-        records: [],
-        recentRecords: [],
-        chartData: [],
-        latestWeight: null,
-        latestBodyFat: null,
-        totalDays: 0,
-        exerciseDays: 0,
-        totalExerciseMinutes: 0,
-        avgWater: 0
+        totalDays: 0, exerciseDays: 0,
+        totalExerciseMinutes: 0, avgWater: 0
       });
       return;
     }
 
-    // 计算统计数据
-    const totalDays = records.length;
     let exerciseDays = 0;
     let totalExerciseMinutes = 0;
     let totalWater = 0;
     let waterCount = 0;
 
     for (let i = 0; i < records.length; i++) {
-      const record = records[i];
-
-      // 运动统计
-      if (record.exercise && record.exercise.exercised) {
+      const r = records[i];
+      if (r.exercised) {
         exerciseDays++;
-        totalExerciseMinutes += record.exercise.totalDuration || 0;
+        if (r.exerciseList && r.exerciseList.length > 0) {
+          for (let j = 0; j < r.exerciseList.length; j++) {
+            totalExerciseMinutes += r.exerciseList[j].duration || 0;
+          }
+        }
       }
-
-      // 饮水统计
-      if (record.diet && record.diet.water) {
-        totalWater += record.diet.water;
+      if (r.water) {
+        totalWater += r.water;
         waterCount++;
       }
     }
 
-    const avgWater = waterCount > 0 ? Math.round(totalWater / waterCount) : 0;
-
-    // 最新数据
-    const latestRecord = records[0];
-    const latestWeight = latestRecord.weight;
-    const latestBodyFat = latestRecord.bodyFat;
-
-    // 计算变化值
-    let weightChange = 0;
-    let fatChange = 0;
-
-    if (records.length >= 2) {
-      const firstRecord = records[records.length - 1];
-      weightChange = latestWeight - firstRecord.weight;
-      if (latestBodyFat && firstRecord.bodyFat) {
-        fatChange = latestBodyFat - firstRecord.bodyFat;
-      }
-    }
-
-    const weightChangeText = this.formatChange(weightChange);
-    const fatChangeText = this.formatChange(fatChange);
-
-    // 图表数据（按日期正序排列）
-    const chartData = records.slice().reverse().map(function(record) {
-      return {
-        date: record.date,
-        weight: record.weight
-      };
-    });
-
     this.setData({
-      loading: false,
-      records: records,
-      recentRecords: records.slice(0, 5),
-      chartData: chartData,
-      latestWeight: latestWeight,
-      latestBodyFat: latestBodyFat,
-      weightChange: weightChange,
-      fatChange: fatChange,
-      weightChangeText: weightChangeText,
-      fatChangeText: fatChangeText,
-      totalDays: totalDays,
+      totalDays: records.length,
       exerciseDays: exerciseDays,
       totalExerciseMinutes: totalExerciseMinutes,
-      avgWater: avgWater
+      avgWater: waterCount > 0 ? Math.round(totalWater / waterCount) : 0
     });
+  },
 
-    // 绘制图表
-    this.drawChart();
+  // ========== 趋势图相关 ==========
+
+  onMetricChange(e) {
+    this.setData({ metricIndex: e.detail.value });
+    this.updateChartFromCache();
+  },
+
+  onTimeRangeChange(e) {
+    this.setData({ timeRangeIndex: e.detail.value });
+    this.updateChartFromCache();
+  },
+
+  onGranularityChange(e) {
+    this.setData({ granularityIndex: e.detail.value });
+    this.updateChartFromCache();
+  },
+
+  // 从缓存数据更新图表
+  updateChartFromCache() {
+    if (this._allRecords.length === 0) return;
+    var aggregated = this.aggregateData(this._allRecords);
+    this.renderWxChart(aggregated);
+  },
+
+  // 聚合数据
+  aggregateData(allRecords) {
+    const metricKey = this.data.metricKeys[this.data.metricIndex];
+    const timeRangeKey = this.data.timeRangeKeys[this.data.timeRangeIndex];
+    const granularityKey = this.data.granularityKeys[this.data.granularityIndex];
+    const metric = METRIC_CONFIG[metricKey];
+
+    // 按时间范围过滤
+    var records = allRecords.slice();
+    if (timeRangeKey !== 'all') {
+      const days = TIME_RANGE_CONFIG[timeRangeKey].days;
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+      const cutoffStr = this.formatDate(cutoff);
+      records = records.filter(function(r) { return r.date >= cutoffStr; });
+    }
+
+    // 按日期升序排列
+    records.sort(function(a, b) { return a.date.localeCompare(b.date); });
+
+    if (granularityKey === 'daily') {
+      return {
+        categories: records.map(function(r) { return r.date.substring(5); }),
+        data: records.map(function(r) { return r[metricKey] != null ? r[metricKey] : null; }),
+        color: metric.color,
+        unit: metric.unit,
+        label: metric.label
+      };
+    }
+
+    // 按月/年分组取平均值
+    var groups = {};
+    for (var i = 0; i < records.length; i++) {
+      var r = records[i];
+      var val = r[metricKey];
+      if (val == null) continue;
+
+      var key = granularityKey === 'monthly' ? r.date.substring(0, 7) : r.date.substring(0, 4);
+      if (!groups[key]) groups[key] = { sum: 0, count: 0 };
+      groups[key].sum += val;
+      groups[key].count++;
+    }
+
+    var sortedKeys = Object.keys(groups).sort();
+    return {
+      categories: sortedKeys.map(function(k) { return granularityKey === 'monthly' ? k.substring(2) : k; }),
+      data: sortedKeys.map(function(k) {
+        var avg = groups[k].sum / groups[k].count;
+        return Number(avg.toFixed(metric.decimals));
+      }),
+      color: metric.color,
+      unit: metric.unit,
+      label: metric.label
+    };
+  },
+
+  // 使用 wx-charts 渲染折线图
+  renderWxChart(aggregated) {
+    if (!aggregated || aggregated.data.length === 0) return;
+
+    // 销毁旧实例
+    if (this._chart) {
+      this._chart = null;
+    }
+
+    try {
+      this._chart = new wxCharts({
+        type: 'line',
+        canvasId: 'trendChart',
+        context: wx.createCanvasContext('trendChart'),
+        width: 690 / 2,
+        height: 400 / 2,
+        background: '#FFFFFF',
+        animation: true,
+        categories: aggregated.categories,
+        series: [{
+          name: aggregated.label,
+          data: aggregated.data,
+          format: function(val) {
+            return val + aggregated.unit;
+          }
+        }],
+        color: [aggregated.color],
+        xAxis: {
+          disableGrid: true,
+          fontColor: '#999999',
+          fontSize: 10
+        },
+        yAxis: {
+          gridColor: '#E8E8E8',
+          fontColor: '#999999',
+          fontSize: 10,
+          format: function(val) {
+            return Number(val).toFixed(1);
+          },
+          min: undefined // 自动计算
+        },
+        dataLabel: false,
+        dataPointShape: true,
+        extra: {
+          line: {
+            width: 2,
+            shape: 'circle'
+          },
+          lineStyle: 'curve'
+        }
+      });
+    } catch (err) {
+      console.error('wx-charts 渲染失败：', err);
+    }
   },
 
   // 格式化变化值
@@ -207,122 +373,41 @@ Page({
     return year + '-' + month + '-' + day;
   },
 
-  // 绘制图表
-  drawChart() {
-    const chartData = this.data.chartData;
-    if (chartData.length === 0) return;
+  // 悬浮菜单点击事件
+  onFloatMenuTap(e) {
+    const { item } = e.detail;
+    switch (item.id) {
+      case 'date':
+        break;
+      case 'chart':
+        wx.navigateTo({ url: '/pages/leanLog/index' });
+        break;
+      case 'theme':
+        this.setData({ showThemePopup: true });
+        break;
+    }
+  },
 
-    const self = this;
-    const query = wx.createSelectorQuery();
-    query.select('#weightChart')
-      .fields({ node: true, size: true })
-      .exec(function(res) {
-        if (!res || !res[0] || !res[0].node) {
-          console.error('获取 canvas 节点失败');
-          return;
-        }
-
-        const canvas = res[0].node;
-        const ctx = canvas.getContext('2d');
-        const width = res[0].width;
-        const height = res[0].height;
-
-        canvas.width = width * 2;
-        canvas.height = height * 2;
-        ctx.scale(2, 2);
-
-        self.renderChart(ctx, width, height, chartData);
+  // 主题切换事件
+  onThemeChange(e) {
+    const { themeId, theme } = e.detail;
+    if (theme) {
+      this.setData({
+        currentTheme: theme,
+        primaryColor: theme.color,
+        primaryColorLight: theme.lightColor
       });
-  },
-
-  // 渲染图表
-  renderChart(ctx, width, height, data) {
-    if (data.length === 0) return;
-
-    const padding = CHART_CONFIG.padding;
-    const chartWidth = width - padding * 2;
-    const chartHeight = height - padding * 2;
-
-    // 计算数据范围
-    const weights = data.map(function(d) { return d.weight; });
-    const minWeight = Math.floor(Math.min.apply(null, weights) - 1);
-    const maxWeight = Math.ceil(Math.max.apply(null, weights) + 1);
-    const weightRange = maxWeight - minWeight;
-
-    // 清空画布
-    ctx.clearRect(0, 0, width, height);
-
-    // 绘制网格线
-    ctx.strokeStyle = CHART_CONFIG.gridColor;
-    ctx.lineWidth = 0.5;
-
-    const gridCount = 5;
-    for (let i = 0; i <= gridCount; i++) {
-      const y = padding + (chartHeight / gridCount) * i;
-      ctx.beginPath();
-      ctx.moveTo(padding, y);
-      ctx.lineTo(width - padding, y);
-      ctx.stroke();
-    }
-
-    // 绘制数据点和连线
-    ctx.strokeStyle = CHART_CONFIG.lineColor;
-    ctx.lineWidth = CHART_CONFIG.lineWidth;
-    ctx.fillStyle = CHART_CONFIG.pointColor;
-
-    const points = [];
-    const pointCount = data.length;
-
-    for (let i = 0; i < pointCount; i++) {
-      const x = padding + (chartWidth / (pointCount - 1 || 1)) * i;
-      const y = padding + chartHeight - ((data[i].weight - minWeight) / weightRange) * chartHeight;
-      points.push({ x: x, y: y });
-    }
-
-    // 绘制连线
-    ctx.beginPath();
-    for (let i = 0; i < points.length; i++) {
-      if (i === 0) {
-        ctx.moveTo(points[i].x, points[i].y);
-      } else {
-        ctx.lineTo(points[i].x, points[i].y);
-      }
-    }
-    ctx.stroke();
-
-    // 绘制数据点
-    for (let i = 0; i < points.length; i++) {
-      ctx.beginPath();
-      ctx.arc(points[i].x, points[i].y, CHART_CONFIG.pointRadius, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // 绘制日期标签（只显示首尾）
-    ctx.fillStyle = CHART_CONFIG.textColor;
-    ctx.font = CHART_CONFIG.fontSize + 'px sans-serif';
-    ctx.textAlign = 'center';
-
-    if (data.length > 0) {
-      // 第一个日期
-      const firstDate = data[0].date.substring(5);
-      ctx.fillText(firstDate, padding, height - 8);
-
-      // 最后一个日期
-      if (data.length > 1) {
-        const lastDate = data[data.length - 1].date.substring(5);
-        ctx.fillText(lastDate, width - padding, height - 8);
-      }
+      wx.setStorageSync('themeId', themeId);
+      this.showNotify('主题已切换为' + theme.name, 'success');
+      this.setData({ showThemePopup: false });
+      // 刷新图表颜色
+      this.updateChartFromCache();
     }
   },
 
-  // 查看记录详情
-  viewRecord(e) {
-    const id = e.currentTarget.dataset.id;
-    // 可以跳转到详情页或编辑页
-    wx.showToast({
-      title: '功能开发中',
-      icon: 'none'
-    });
+  // 关闭主题弹窗
+  closeThemePopup() {
+    this.setData({ showThemePopup: false });
   },
 
   // 显示弱提示
