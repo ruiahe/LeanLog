@@ -32,7 +32,12 @@ const FLOAT_MENU = {
   ],
 };
 
-// 饥饿成都分类
+// 打卡属性列表
+const PROPERTIES = ['weight', 'bodyFat', 'isHealthyDiet', 'water', 'diet',
+'stepNumber', 'exercised', 'exerciseList', 'sleepDuration', 'mood', 'hunger',
+'bedTimeWeight', 'notes', 'chest', 'waist', 'hip', 'arm', 'thigh'];
+
+// 饥饿程度分类
 const HUNGER_OPTIONS = [
   { label: '很饿', value: 'very_hungry' },
   { label: '有点饿', value: 'slightly_hungry' },
@@ -41,9 +46,47 @@ const HUNGER_OPTIONS = [
   { label: '很饱', value: 'very_full' }
 ]
 
+// 运动分类配置
+const EXERCISE_CATEGORIES = [
+  { label: '有氧运动', value: 'aerobic_exercise' },
+  { label: '无氧运动', value: 'anaerobic_exercise' }
+];
+
+// 运动项目
+const EXERCISE_TYPES_BY_CATEGORY = {
+  'aerobic_exercise': [{ label: '快走', value: 'brisk_walking' },
+    { label: '慢跑', value: 'jogging' },
+    { label: '游泳', value: 'swimming' },
+    { label: '骑自行车', value: 'cycling' },
+    { label: '动感单车', value: 'spinning' },
+    { label: '跳绳', value: 'rope_skipping' },
+    { label: '椭圆机训练', value: 'elliptical_training' },
+    { label: '划船机训练', value: 'rowing' },
+    { label: '登山机训练', value: 'stair_climbing' },
+    { label: '有氧搏击操', value: 'cardio_kickboxing' },
+    { label: '瑜伽', value: 'yoga' },
+    { label: '其他有氧', value: 'other_aerobic' }],
+  'anaerobic_exercise': [
+      { label: '深蹲', value: 'squat' },
+      { label: '硬拉', value: 'deadlift' },
+      { label: '卧推', value: 'benchpress' },
+      { label: '引体向上', value: 'pull_up' },
+      { label: '肩部推举', value: 'overhead_press' },
+      { label: '臂屈伸', value: 'triceps_dip' },
+      { label: '弯举', value: 'bicep_curl' },
+      { label: '腿举', value: 'leg_press' },
+      { label: '坐姿划船', value: 'seated_row' },
+      { label: '平板支撑', value: 'plank' },
+      { label: '其他无氧', value: 'other_anaerobic' }
+  ]
+};
+
 module.exports = {
   MANIFESTO,
   THEME_CONFIG,
   FLOAT_MENU,
-  HUNGER_OPTIONS
+  PROPERTIES,
+  HUNGER_OPTIONS,
+  EXERCISE_TYPES_BY_CATEGORY,
+  EXERCISE_CATEGORIES
 };

@@ -30,32 +30,28 @@ Component({
       }
 
       const currentDateStr = formatDate(currentDateTimestamp);
-      const db = wx.cloud.database();
-      const _ = db.command;
 
       wx.showLoading({ title: '加载中...', mask: true });
       const self = this;
-      db.collection('lean_logs')
-        .where({ userId, date: _.lt(currentDateStr) })
-        .orderBy('date', 'desc')
-        .limit(1)
-        .get()
-        .then(function(res) {
-          wx.hideLoading();
-          if (res?.data && res.data?.length > 0) {
-            const { _id, ...rest } = res.data[0];
-            const copied = {};
-            Object.assign(copied, rest);
-            self.triggerEvent('fill', { record: copied });
-          } else {
-            self.triggerEvent('shownotify', { message: '该日期之前暂无记录', type: 'warning' });
-          }
-        })
-        .catch(function(err) {
-          wx.hideLoading();
-          console.error('查询记录失败：', err);
-          self.triggerEvent('shownotify', { message: '加载失败，请重试', type: 'danger' });
-        });
+      wx.cloud.callFunction({
+        name: 'quickstartFunctions',
+        data: { type: 'getPreviousRecord', userId, date: currentDateStr }
+      }).then(function(res) {
+        wx.hideLoading();
+        const data = res.result?.data || [];
+        if (data.length > 0) {
+          const { _id, ...rest } = data[0];
+          const copied = {};
+          Object.assign(copied, rest);
+          self.triggerEvent('fill', { record: copied });
+        } else {
+          self.triggerEvent('shownotify', { message: '该日期之前暂无记录', type: 'warning' });
+        }
+      }).catch(function(err) {
+        wx.hideLoading();
+        console.error('查询记录失败：', err);
+        self.triggerEvent('shownotify', { message: '加载失败，请重试', type: 'danger' });
+      });
     }
   }
 });

@@ -3,34 +3,7 @@
  * 两步选择：先选分类（有氧/无氧），再选具体运动类型
  * 支持自定义运动类型输入
  */
-
-// 运动分类配置
-const EXERCISE_CATEGORIES = [
-  { label: '有氧运动', value: '1' },
-  { label: '无氧运动', value: '2' }
-];
-
-// 运动项目（按分类）
-const EXERCISE_TYPES_BY_CATEGORY = {
-  '1': [
-    { label: '快走', value: 'walk' },
-    { label: '慢跑', value: 'jog' },
-    { label: '游泳', value: 'swim' },
-    { label: '骑行', value: 'cycle' },
-    { label: '跳绳', value: 'rope' },
-    { label: '瑜伽', value: 'yoga' },
-    { label: '其他有氧', value: 'other_aerobic' }
-  ],
-  '2': [
-    { label: '力量训练', value: 'strength' },
-    { label: '举重', value: 'weightlifting' },
-    { label: '俯卧撑', value: 'pushup' },
-    { label: '深蹲', value: 'squat' },
-    { label: '引体向上', value: 'pullup' },
-    { label: '平板支撑', value: 'plank' },
-    { label: '其他无氧', value: 'other_anaerobic' }
-  ]
-};
+const { EXERCISE_CATEGORIES, EXERCISE_TYPES_BY_CATEGORY } = require('../../constants/index');
 
 Component({
   properties: {

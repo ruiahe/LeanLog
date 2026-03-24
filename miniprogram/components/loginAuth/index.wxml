@@ -1,7 +1,7 @@
 <!-- 登录授权组件 -->
 <van-dialog
   use-slot
-  title="欢迎使用 LeanLog"
+  title="欢迎使用Lean Log"
   show="{{ show }}"
   show-confirm-button="{{ false }}"
   close-on-click-overlay="{{ false }}"

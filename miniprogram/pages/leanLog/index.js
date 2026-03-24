@@ -1,5 +1,5 @@
 // miniprogram/pages/leanLog/index.js
-const { THEME_CONFIG, FLOAT_MENU, MANIFESTO, HUNGER_OPTIONS } = require('../../constants/index');
+const { THEME_CONFIG, FLOAT_MENU, MANIFESTO, HUNGER_OPTIONS, PROPERTIES } = require('../../constants/index');
 const { getThemeById, formatDate } = require('../../utils/index');
 const toastModule = require('../../miniprogram_npm/@vant/weapp/toast/toast');
 const notifyModule = require('../../miniprogram_npm/@vant/weapp/notify/notify');
@@ -62,7 +62,7 @@ Page({
       mood: 0,
       hunger: 'normal',
       // 睡前数据
-      sleepDuration: 7,
+      sleepDuration: '',
       notes: '',
       // 三维记录（每周记录）
       chest: '',    // 胸围
@@ -89,9 +89,7 @@ Page({
   // 保存记录快照（记录加载或保存后调用）
   saveSnapshot(record) {
     // 深拷贝，过滤掉系统字段
-    var fieldsToKeep = ['weight', 'bodyFat', 'isHealthyDiet', 'water', 'diet',
-      'stepNumber', 'exercised', 'exerciseList', 'sleepDuration', 'mood', 'hunger',
-      'bedTimeWeight', 'notes', 'chest', 'waist', 'hip', 'arm', 'thigh'];
+    var fieldsToKeep = PROPERTIES;
     var snapshot = {};
     fieldsToKeep.forEach(function(key) {
       if (record[key] !== undefined) {
@@ -105,9 +103,7 @@ Page({
     var snapshot = this._savedSnapshot;
     if (!snapshot) return false;
     var record = this.data.record;
-    var fieldsToCheck = ['weight', 'bodyFat', 'isHealthyDiet', 'water', 'diet',
-      'stepNumber', 'exercised', 'exerciseList', 'sleepDuration', 'mood', 'hunger',
-      'bedTimeWeight', 'notes', 'chest', 'waist', 'hip', 'arm', 'thigh'];
+    var fieldsToCheck = PROPERTIES;
     for (var i = 0; i < fieldsToCheck.length; i++) {
       var key = fieldsToCheck[i];
       var current = JSON.stringify(record[key] != null ? record[key] : '');
@@ -235,23 +231,21 @@ Page({
       return;
     }
     const self = this;
-    const db = wx.cloud.database();
-    db.collection('lean_logs')
-      .where({ userId })
-      .field({ date: true })
-      .get()
-      .then(function(res) {
-        if (res?.data && res.data?.length > 0) {
-          const dates = res.data.map(function(item) {
-            return item.date;
-          });
-          self.setData({ recordDates: dates });
-          self.calcStreak(dates);
-        }
-      })
-      .catch(function(err) {
-        console.error('获取记录日期失败：', err);
-      });
+    wx.cloud.callFunction({
+      name: 'quickstartFunctions',
+      data: { type: 'getRecordDates', userId }
+    }).then(function(res) {
+      const dates = res.result?.data || [];
+      if (dates.length > 0) {
+        const dateList = dates.map(function(item) {
+          return item.date;
+        });
+        self.setData({ recordDates: dateList });
+        self.calcStreak(dateList);
+      }
+    }).catch(function(err) {
+      console.error('获取记录日期失败：', err);
+    });
   },
   // 计算连续打卡天数（从今天或昨天开始往前数）
   calcStreak(dates) {
@@ -285,7 +279,7 @@ Page({
   },
   // 更新当前表单
   updateCurrentForm(res) {
-    if (res.data?.length) {
+    if (res?.data?.length) {
       const recordData = res.data[0];
       this.setData({
         record: recordData,
@@ -307,31 +301,27 @@ Page({
   checkRecordByDate() {
     const { userId, currentDateTimestamp } = this.data;
     const date = formatDate(currentDateTimestamp);
-    return wx.cloud.database().collection('lean_logs')
-      .where({ userId, date })
-      .limit(1)
-      .get();
+    return wx.cloud.callFunction({
+      name: 'quickstartFunctions',
+      data: { type: 'getRecordByDate', userId, date }
+    }).then(function(res) {
+      return res.result;
+    });
   },
   // 更新记录（使用 doc().update() 方式，更可靠）
   updateRecord(recordId, record) {
-    // 构建更新数据，过滤掉 undefined 和 null 的字段，以及 _id
-    const updateData = {};
-    Object.keys(record).forEach((key) => {
-      if (key !== '_id' && key !== '_openid' && record[key] !== undefined && record[key] !== null) {
-        updateData[key] = record[key];
-      }
+    return wx.cloud.callFunction({
+      name: 'quickstartFunctions',
+      data: { type: 'updateLog', recordId, record }
     });
-    const db = wx.cloud.database();
-    return db.collection('lean_logs')
-      .doc(recordId)
-      .update({ data: updateData });
   },
   // 新增记录
   addRecord(record, userId, currentDateTimestamp) {
     const date = formatDate(currentDateTimestamp);
-    const {_openid, ...rest} = record;
-    return wx.cloud.database().collection('lean_logs')
-      .add({ data: { ...rest, userId, date } });
+    return wx.cloud.callFunction({
+      name: 'quickstartFunctions',
+      data: { type: 'addLog', record, userId, date }
+    });
   },
   // 提交表单（优化：无需再次查询数据库，直接根据 currentRecordId 判断）
   // callback: 可选，保存成功后的回调
@@ -359,9 +349,10 @@ Page({
 
     promise.then(function(res) {
       wx.hideLoading();
-      // 如果是新增，保存返回的 _id
-      if (!currentRecordId && res._id) {
-        self.setData({ currentRecordId: res._id });
+      // 如果是新增，保存返回的 _id（callFunction 结果在 res.result 中）
+      const result = res.result || res;
+      if (!currentRecordId && result._id) {
+        self.setData({ currentRecordId: result._id });
       }
       self.saveSnapshot(record);
       self.showNotify('保存成功，继续保持！', 'success');

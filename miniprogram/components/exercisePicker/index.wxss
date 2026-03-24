@@ -40,6 +40,8 @@
 /* ==================== 选项列表 ==================== */
 .picker-options {
   padding: 20rpx 40rpx 0;
+  max-height: 400rpx;
+  overflow-y: auto;
 }
 
 .picker-option {

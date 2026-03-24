@@ -78,36 +78,26 @@ Page({
       return;
     }
 
-    const db = wx.cloud.database();
-    let query = db.collection('lean_logs');
-
-    // 根据时间范围设置查询条件
+    // 根据时间范围计算开始日期
+    let startDate = '';
     if (this.data.timeRange !== 'all') {
       const days = this.data.timeRange === 'week' ? 7 : 30;
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - days);
-      const startDateStr = this.formatDate(startDate);
-      query = query.where({
-        userId: userId,
-        date: db.command.gte(startDateStr)
-      });
-    } else {
-      query = query.where({ userId: userId });
+      const startDateObj = new Date();
+      startDateObj.setDate(startDateObj.getDate() - days);
+      startDate = this.formatDate(startDateObj);
     }
 
-    query
-      .orderBy('date', 'desc')
-      .limit(100)
-      .get()
-      .then(function(res) {
-        const records = res.data || [];
-        self.processData(records);
-      })
-      .catch(function(err) {
-        console.error('加载统计数据失败：', err);
-        self.setData({ loading: false });
-        self.showNotify('加载失败，请重试', 'danger');
-      });
+    wx.cloud.callFunction({
+      name: 'quickstartFunctions',
+      data: { type: 'getLogList', userId, startDate }
+    }).then(function(res) {
+      const records = res.result?.data || [];
+      self.processData(records);
+    }).catch(function(err) {
+      console.error('加载统计数据失败：', err);
+      self.setData({ loading: false });
+      self.showNotify('加载失败，请重试', 'danger');
+    });
   },
 
   // 处理数据

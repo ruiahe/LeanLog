@@ -36,129 +36,78 @@ const login = async () => {
   }
 };
 
-// 获取小程序二维码
-const getMiniProgramCode = async () => {
-  // 获取小程序二维码的buffer
-  const resp = await cloud.openapi.wxacode.get({
-    path: "pages/index/index",
+// ========== lean_logs 相关接口 ==========
+
+// 获取用户所有有记录的日期
+const getRecordDates = async (event) => {
+  const { userId } = event;
+  if (!userId) return { data: [] };
+  const res = await db.collection('lean_logs')
+    .where({ userId })
+    .field({ date: true })
+    .get();
+  return res;
+};
+
+// 根据日期获取记录
+const getRecordByDate = async (event) => {
+  const { userId, date } = event;
+  if (!userId || !date) return { data: [] };
+  return await db.collection('lean_logs')
+    .where({ userId, date })
+    .limit(1)
+    .get();
+};
+
+// 新增记录
+const addLog = async (event) => {
+  const { record, userId, date } = event;
+  const { _openid, ...rest } = record;
+  const res = await db.collection('lean_logs').add({
+    data: { ...rest, userId, date }
   });
-  const { buffer } = resp;
-  // 将图片上传云存储空间
-  const upload = await cloud.uploadFile({
-    cloudPath: "code.png",
-    fileContent: buffer,
-  });
-  return upload.fileID;
+  return res;
 };
 
-// 创建集合
-const createCollection = async () => {
-  try {
-    // 创建集合
-    await db.createCollection("sales");
-    await db.collection("sales").add({
-      // data 字段表示需新增的 JSON 数据
-      data: {
-        region: "华东",
-        city: "上海",
-        sales: 11,
-      },
-    });
-    await db.collection("sales").add({
-      // data 字段表示需新增的 JSON 数据
-      data: {
-        region: "华东",
-        city: "南京",
-        sales: 11,
-      },
-    });
-    await db.collection("sales").add({
-      // data 字段表示需新增的 JSON 数据
-      data: {
-        region: "华南",
-        city: "广州",
-        sales: 22,
-      },
-    });
-    await db.collection("sales").add({
-      // data 字段表示需新增的 JSON 数据
-      data: {
-        region: "华南",
-        city: "深圳",
-        sales: 22,
-      },
-    });
-    return {
-      success: true,
-    };
-  } catch (e) {
-    // 这里catch到的是该collection已经存在，从业务逻辑上来说是运行成功的，所以catch返回success给前端，避免工具在前端抛出异常
-    return {
-      success: true,
-      data: "create collection success",
-    };
-  }
-};
-
-// 查询数据
-const selectRecord = async () => {
-  // 返回数据库查询结果
-  return await db.collection("sales").get();
-};
-
-// 更新数据
-const updateRecord = async (event) => {
-  try {
-    // 遍历修改数据库信息
-    for (let i = 0; i < event.data.length; i++) {
-      await db
-        .collection("sales")
-        .where({
-          _id: event.data[i]._id,
-        })
-        .update({
-          data: {
-            sales: event.data[i].sales,
-          },
-        });
+// 更新记录
+const updateLog = async (event) => {
+  const { recordId, record } = event;
+  const updateData = {};
+  Object.keys(record).forEach((key) => {
+    if (key !== '_id' && key !== '_openid' && record[key] !== undefined && record[key] !== null) {
+      updateData[key] = record[key];
     }
-    return {
-      success: true,
-      data: event.data,
-    };
-  } catch (e) {
-    return {
-      success: false,
-      errMsg: e,
-    };
-  }
+  });
+  return await db.collection('lean_logs').doc(recordId).update({ data: updateData });
 };
 
-// 新增数据
-const insertRecord = async (event) => {
-  try {
-    const insertRecord = event.data;
-    // 插入数据
-    await db.collection("sales").add({
-      data: {
-        region: insertRecord.region,
-        city: insertRecord.city,
-        sales: Number(insertRecord.sales),
-      },
+// 获取记录列表（统计页用）
+const getLogList = async (event) => {
+  const { userId, startDate } = event;
+  if (!userId) return { data: [] };
+  let query = db.collection('lean_logs').where({ userId });
+  if (startDate) {
+    query = db.collection('lean_logs').where({
+      userId,
+      date: db.command.gte(startDate)
     });
-    return {
-      success: true,
-      data: event.data,
-    };
-  } catch (e) {
-    return {
-      success: false,
-      errMsg: e,
-    };
   }
+  return await query.orderBy('date', 'desc').limit(100).get();
 };
 
-// 删除数据
+// 获取最近的上一条记录（一键填写用）
+const getPreviousRecord = async (event) => {
+  const { userId, date } = event;
+  if (!userId || !date) return { data: [] };
+  const _ = db.command;
+  return await db.collection('lean_logs')
+    .where({ userId, date: _.lt(date) })
+    .orderBy('date', 'desc')
+    .limit(1)
+    .get();
+};
+
+// 删除记录
 const deleteRecord = async (event) => {
   try {
     await db
@@ -179,21 +128,22 @@ const deleteRecord = async (event) => {
 };
 
 // 云函数入口函数
-exports.main = async (event, context) => {
+exports.main = async (event) => {
   switch (event.type) {
     case "login":
       return await login(event);
-    case "getMiniProgramCode":
-      return await getMiniProgramCode();
-    case "createCollection":
-      return await createCollection();
-    case "selectRecord":
-      return await selectRecord();
-    case "updateRecord":
-      return await updateRecord(event);
-    case "insertRecord":
-      return await insertRecord(event);
-    case "deleteRecord":
-      return await deleteRecord(event);
+    // lean_logs 接口
+    case "getRecordDates":
+      return await getRecordDates(event);
+    case "getRecordByDate":
+      return await getRecordByDate(event);
+    case "addLog":
+      return await addLog(event);
+    case "updateLog":
+      return await updateLog(event);
+    case "getLogList":
+      return await getLogList(event);
+    case "getPreviousRecord":
+      return await getPreviousRecord(event);
   }
 };
