@@ -40,7 +40,7 @@
           <!-- 体脂率 -->
           <view class="overview-card">
             <view class="card-icon fat-icon">
-              <van-icon name="percentage" size="24" />
+              <van-icon name="certificate" size="24" />
             </view>
             <view class="card-info">
               <view class="card-label">今日体脂率</view>
@@ -59,20 +59,28 @@
         <view class="section-title">打卡统计</view>
         <view class="stats-cards">
           <view class="stat-card">
-            <view class="stat-value">{{ totalDays }}</view>
             <view class="stat-label">打卡天数</view>
+            <view class="stat-value">{{ totalDays }}<text class="stat-unit">d</text></view>
           </view>
           <view class="stat-card">
-            <view class="stat-value">{{ exerciseDays }}</view>
+            <view class="stat-label">连续打卡</view>
+            <view class="stat-value">{{ streakDays }}<text class="stat-unit">d</text></view>
+          </view>
+          <view class="stat-card">
             <view class="stat-label">运动天数</view>
+            <view class="stat-value">{{ exerciseDays }}<text class="stat-unit">d</text></view>
           </view>
           <view class="stat-card">
-            <view class="stat-value">{{ totalExerciseMinutes }}</view>
-            <view class="stat-label">运动时长(分)</view>
+            <view class="stat-label">运动时长</view>
+            <view class="stat-value">{{ totalExerciseMinutes }}<text class="stat-unit">min</text></view>
           </view>
           <view class="stat-card">
-            <view class="stat-value">{{ avgWater }}<text class="stat-unit">ml</text></view>
+            <view class="stat-label">日均睡眠</view>
+            <view class="stat-value">{{ avgSleep }}<text class="stat-unit">h</text></view>
+          </view>
+          <view class="stat-card">
             <view class="stat-label">日均饮水</view>
+            <view class="stat-value">{{ avgWater }}<text class="stat-unit">ml</text></view>
           </view>
         </view>
       </view>
@@ -83,26 +91,20 @@
         <!-- 选择器栏 -->
         <view class="picker-bar">
           <!-- 指标选择 -->
-          <picker mode="selector" range="{{ metricNames }}" value="{{ metricIndex }}" bindchange="onMetricChange">
-            <view class="picker-tag">
-              <text>{{ metricNames[metricIndex] }}</text>
-              <van-icon name="arrow-down" size="12" />
-            </view>
-          </picker>
-          <!-- 时间范围选择 -->
-          <picker mode="selector" range="{{ timeRangeNames }}" value="{{ timeRangeIndex }}" bindchange="onTimeRangeChange">
-            <view class="picker-tag">
-              <text>{{ timeRangeNames[timeRangeIndex] }}</text>
-              <van-icon name="arrow-down" size="12" />
-            </view>
-          </picker>
+          <view class="picker-tag" bindtap="onShowMetricPicker">
+            <text>{{ metricNames[metricIndex] }}</text>
+            <van-icon name="arrow-down" size="12" />
+          </view>
+          <!-- 时间段选择 -->
+          <view class="picker-tag date-range-tag" bindtap="onShowCalendar">
+            <van-icon name="calendar-o" size="12" />
+            <text>{{ dateRangeText }}</text>
+          </view>
           <!-- 粒度选择 -->
-          <picker mode="selector" range="{{ granularityNames }}" value="{{ granularityIndex }}" bindchange="onGranularityChange">
-            <view class="picker-tag">
-              <text>{{ granularityNames[granularityIndex] }}</text>
-              <van-icon name="arrow-down" size="12" />
-            </view>
-          </picker>
+          <view class="picker-tag" bindtap="onShowGranularityPicker">
+            <text>{{ granularityNames[granularityIndex] }}</text>
+            <van-icon name="arrow-down" size="12" />
+          </view>
         </view>
         <!-- 图表 -->
         <view class="chart-container">
@@ -110,7 +112,7 @@
             canvas-id="trendChart"
             class="chart-canvas"
           ></canvas>
-          <view class="chart-tips" wx:if="{{ chartData.length === 0 }}">暂无数据</view>
+          <view class="chart-tips" wx:if="{{ !hasRecords }}">暂无数据</view>
         </view>
       </view>
     </block>
@@ -118,6 +120,48 @@
 
   <!-- Notify 弱提示 -->
   <van-notify id="van-notify" />
+
+  <!-- 指标选择弹窗 -->
+  <van-popup show="{{ showMetricPicker }}" position="bottom" round bind:close="onCloseMetricPicker" custom-style="--picker-confirm-action-color: {{ primaryColor }};">
+    <van-picker
+      columns="{{ metricColumns }}"
+      value-key="text"
+      default-index="{{ metricIndex }}"
+      show-toolbar
+      title="选择指标"
+      confirm-button-text="确定"
+      cancel-button-text="取消"
+      bind:confirm="onMetricConfirm"
+      bind:cancel="onCloseMetricPicker"
+    />
+  </van-popup>
+
+  <!-- 粒度选择弹窗 -->
+  <van-popup show="{{ showGranularityPicker }}" position="bottom" round bind:close="onCloseGranularityPicker" custom-style="--picker-confirm-action-color: {{ primaryColor }};">
+    <van-picker
+      columns="{{ granularityColumns }}"
+      value-key="text"
+      default-index="{{ granularityIndex }}"
+      show-toolbar
+      title="选择粒度"
+      confirm-button-text="确定"
+      cancel-button-text="取消"
+      bind:confirm="onGranularityConfirm"
+      bind:cancel="onCloseGranularityPicker"
+    />
+  </van-popup>
+
+  <!-- 日历弹窗 -->
+  <van-popup show="{{ showCalendar }}" position="bottom" round bind:close="onCalendarClose">
+    <calendar
+      mode="range"
+      range-start="{{ calendarRangeStart }}"
+      range-end="{{ calendarRangeEnd }}"
+      theme="{{ currentTheme }}"
+      bind:confirm="onCalendarConfirm"
+      bind:cancel="onCalendarClose"
+    />
+  </van-popup>
 
   <!-- 主题选择弹窗 -->
   <theme-picker

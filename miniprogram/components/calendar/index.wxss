@@ -115,6 +115,51 @@
   opacity: 0.4;
 }
 
+/* ==================== Range 范围选择样式 ==================== */
+
+/* 范围背景条 */
+.range-bg {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 56rpx;
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+/* 范围起始：右侧半圆覆盖 */
+.day-item.range-start .range-bg {
+  left: 50%;
+  border-radius: 0 28rpx 28rpx 0;
+}
+
+/* 范围结束：左侧半圆覆盖 */
+.day-item.range-end .range-bg {
+  right: 50%;
+  border-radius: 28rpx 0 0 28rpx;
+}
+
+/* 起始和结束在同一天 */
+.day-item.range-start.range-end .range-bg {
+  left: 0;
+  right: 0;
+  border-radius: 28rpx;
+}
+
+/* 日期数字在范围背景之上 */
+.day-item.range-start .day-number,
+.day-item.range-end .day-number,
+.day-item.in-range .day-number {
+  position: relative;
+  z-index: 1;
+}
+
+/* 范围内圆点颜色 */
+.day-item.in-range .day-dot {
+  background: var(--primary-color, #E8B4B8);
+}
+
 /* 底部按钮 */
 .calendar-footer {
   display: flex;

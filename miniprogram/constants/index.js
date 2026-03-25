@@ -41,7 +41,7 @@ const PROPERTIE_ITEMS = [
   {label: '饮食记录', value: 'diet'}, 
   {label: '行走步数', value: 'stepNumber', canShowLineChart: true}, 
   {label: '是否运动', value: 'exercised'}, 
-  {label: '运动列表', value: 'exerciseList'}, 
+  {label: '运动总时长', value: 'exerciseList',canShowLineChart: true}, 
   {label: '昨夜睡眠', value: 'sleepDuration', canShowLineChart: true}, 
   {label: '状态', value: 'mood'}, 
   {label: '饥饿感', value: 'hunger'}, 

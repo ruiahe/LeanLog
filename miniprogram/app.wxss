@@ -49,3 +49,44 @@ page {
   flex-direction: column;
   justify-content: flex-start;
 }
+
+/* ==================== 公共头部区域 ==================== */
+.header {
+  position: relative;
+  padding: 30rpx 60rpx 80rpx;
+  margin-bottom: 10rpx;
+}
+
+.header-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 230rpx;
+  border-radius: 0 0 60rpx 60rpx;
+}
+
+.header-content {
+  position: relative;
+  z-index: 1;
+  color: #FFFFFF;
+}
+
+.header-title {
+  font-size: 48rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  margin-bottom: 12rpx;
+  text-align: center;
+}
+
+/* ==================== 公共卡片图标 ==================== */
+.card-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}

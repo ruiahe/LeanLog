@@ -18,14 +18,16 @@
 
   <!-- 日期网格 -->
   <view class="days-grid">
-    <view 
-      class="day-item {{ item.isCurrentMonth ? '' : 'other-month' }} {{ item.isToday ? 'today' : '' }} {{ item.isSelected ? 'selected' : '' }} {{ item.hasRecord ? 'has-record' : '' }} {{ item.isFuture ? 'future' : '' }}"
-      wx:for="{{ days }}" 
+    <view
+      class="day-item {{ item.isCurrentMonth ? '' : 'other-month' }} {{ item.isToday ? 'today' : '' }} {{ item.isSelected ? 'selected' : '' }} {{ item.hasRecord ? 'has-record' : '' }} {{ item.isFuture ? 'future' : '' }} {{ item.isRangeStart ? 'range-start' : '' }} {{ item.isRangeEnd ? 'range-end' : '' }} {{ item.isInRange ? 'in-range' : '' }}"
+      wx:for="{{ days }}"
       wx:key="dateStr"
       bindtap="selectDay"
       data-day="{{ item }}"
     >
-      <view class="day-number" style="{{ item.isToday ? ('background: ' + theme.lightColor + '; color: ' + theme.color) : ''}} {{ item.isSelected ? ('background: ' + theme.color + '; color: #FFF;') : '' }}">{{ item.day }}</view>
+      <!-- range 范围背景条 -->
+      <view class="range-bg" wx:if="{{ item.isInRange || item.isRangeStart || item.isRangeEnd }}" style="background: {{ theme.lightColor }}"></view>
+      <view class="day-number" style="{{ item.isToday && !item.isSelected ? ('background: ' + theme.lightColor + '; color: ' + theme.color) : ''}} {{ item.isSelected ? ('background: ' + theme.color + '; color: #FFF;') : '' }}">{{ item.day }}</view>
       <view class="day-dot" wx:if="{{ item.hasRecord }}"></view>
     </view>
   </view>
