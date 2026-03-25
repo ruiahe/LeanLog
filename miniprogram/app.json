@@ -1,7 +1,5 @@
 {
   "pages": [
-    "pages/index/index",
-    "pages/example/index",
     "pages/leanLog/index",
     "pages/statistics/index"
   ],
@@ -9,7 +7,7 @@
     "backgroundColor": "#F6F6F6",
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#F6F6F6",
-    "navigationBarTitleText": "云开发 QuickStart",
+    "navigationBarTitleText": "LeanLog 减肥打卡",
     "navigationBarTextStyle": "black"
   },
   "sitemapLocation": "sitemap.json",
